@@ -1,0 +1,6 @@
+{
+  "name": "SE104.Q28 Project Management",
+  "description": "Hệ thống quản lý dự án SE104.Q28 với cơ chế xác thực và các bảng Kanban tương tác trực quan.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
