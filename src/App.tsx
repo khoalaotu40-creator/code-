@@ -34,65 +34,16 @@ import LoginView from "./components/LoginView";
 import KanbanColumn from "./components/KanbanColumn";
 import NewsFeedView from "./components/NewsFeedView";
 
+import AddColumnForm from "./function/AddColumnForm";
+import SettingsView from "./function/SettingsView";
+import SidebarNav from "./function/SidebarNav";
+import TopNavBar from "./function/TopNavBar";
+import CreateBoardModal from "./function/CreateBoardModal";
+
 type CurrentPage = "feed" | "boards" | "settings";
 
-interface AddColumnFormProps {
-  handleAddColumn: (title: string) => void;
-}
-
-function AddColumnForm({ handleAddColumn }: AddColumnFormProps) {
-  const [isEditing, setIsEditing] = useState(false);
-  const [title, setTitle] = useState("");
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!title.trim()) return;
-    handleAddColumn(title);
-    setTitle("");
-    setIsEditing(false);
-  };
-
-  if (isEditing) {
-    return (
-      <form onSubmit={handleSubmit} className="bg-surface-container-low p-4 rounded-xl border border-outline border-dashed space-y-3">
-        <input
-          type="text"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          placeholder="Nhập tiêu đề cột (ví dụ: Đang duyệt...)"
-          className="w-full p-2.5 bg-surface-container-lowest border border-outline border-variant rounded-lg text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-primary text-on-surface"
-          required
-          autoFocus
-        />
-        <div className="flex gap-2 justify-end">
-          <button
-            type="button"
-            onClick={() => setIsEditing(false)}
-            className="text-[10px] font-bold text-on-surface-variant hover:underline cursor-pointer"
-          >
-            Hủy bỏ
-          </button>
-          <button
-            type="submit"
-            className="bg-primary hover:bg-opacity-90 active:scale-98 text-on-primary text-[10px] font-bold px-3 py-1.5 rounded-lg shadow-sm transition-all cursor-pointer"
-          >
-            Thêm cột
-          </button>
-        </div>
-      </form>
-    );
-  }
-
-  return (
-    <button
-      onClick={() => setIsEditing(true)}
-      className="w-full py-5 bg-surface-container-low/40 hover:bg-surface-container-low/80 text-on-surface-variant hover:text-primary border-2 border-dashed border-outline-variant hover:border-primary-container text-xs font-bold rounded-xl flex items-center justify-center gap-2 transition-all text-center cursor-pointer min-h-[140px]"
-    >
-      <Plus className="h-5 w-5 text-primary" />
-      <span>Thêm cột mới</span>
-    </button>
-  );
-}
+import BoardsOverview from "./function/BoardsOverview";
+import BoardDetail from "./function/BoardDetail";
 
 export default function App() {
   const [token, setToken] = useState<string | null>(
@@ -467,216 +418,37 @@ export default function App() {
     <div className="flex h-screen w-screen overflow-hidden bg-surface text-on-surface antialiased font-sans">
       
       {/* 1. SIDE NAVIGATION BAR */}
-      <nav
-        id="sidebar_nav"
-        className={`h-full shrink-0 flex flex-col justify-between py-6 bg-surface-container-lowest border-r border-outline-variant shadow-sm z-50 transition-all duration-300 ease-in-out ${
-          isSidebarCollapsed ? "w-[72px] px-2" : "w-[260px] px-4"
-        }`}
-      >
-        <div>
-          {/* Header Branding */}
-          <div className={`mb-8 flex ${isSidebarCollapsed ? "flex-col items-center gap-3 px-1" : "items-center justify-between gap-2 px-3"}`}>
-            <div className="flex items-center gap-2.5 overflow-hidden">
-              <div className="w-10 h-10 shrink-0 rounded-lg bg-primary-container text-on-primary-container flex items-center justify-center font-bold text-lg shadow-sm">
-                S
-              </div>
-              {!isSidebarCollapsed && (
-                <div className="min-w-0">
-                  <h1 className="font-semibold text-base text-primary leading-none mb-1 truncate">
-                    SE104.Q28
-                  </h1>
-                  <p className="text-xs text-on-surface-variant font-medium truncate">
-                    Project Management
-                  </p>
-                </div>
-              )}
-            </div>
-            
-            <button
-              onClick={toggleSidebar}
-              className={`p-1.5 rounded-lg hover:bg-surface-container text-on-surface-variant hover:text-primary transition-all duration-200 cursor-pointer ${isSidebarCollapsed ? "w-9 h-9 flex items-center justify-center mt-1" : ""}`}
-              title={isSidebarCollapsed ? "Mở rộng thanh bên" : "Thu gọn thanh bên"}
-            >
-              {isSidebarCollapsed ? (
-                <ChevronRight className="h-4.5 w-4.5" />
-              ) : (
-                <ChevronLeft className="h-4.5 w-4.5" />
-              )}
-            </button>
-          </div>
+      <SidebarNav
+        isSidebarCollapsed={isSidebarCollapsed}
+        toggleSidebar={toggleSidebar}
+        currentPage={currentPage}
+        selectedBoard={selectedBoard}
+        user={user}
+        onNavigate={(page) => {
+          setSelectedBoard(null);
+          setCurrentPage(page as CurrentPage);
+        }}
+        handleLogout={handleLogout}
+      />
 
-          {/* Navigation Links */}
-          <div className="flex flex-col gap-1.5">
-            <button
-              id="tab_feed"
-              onClick={() => {
-                setSelectedBoard(null);
-                setCurrentPage("feed");
-              }}
-              title={isSidebarCollapsed ? "Trang chủ" : undefined}
-              className={`flex items-center gap-3 py-3 rounded-lg font-semibold text-sm transition-all text-left ${
-                currentPage === "feed" && !selectedBoard
-                  ? "bg-primary-container text-on-primary-container scale-98"
-                  : "text-on-surface-variant hover:bg-surface-container hover:text-on-surface"
-              } ${isSidebarCollapsed ? "justify-center px-0 w-11 mx-auto" : "px-4"}`}
-            >
-              <Home className="h-5 w-5 shrink-0" />
-              {!isSidebarCollapsed && <span>Trang chủ</span>}
-            </button>
-
-            <button
-              id="tab_boards"
-              onClick={() => {
-                setSelectedBoard(null);
-                setCurrentPage("boards");
-              }}
-              title={isSidebarCollapsed ? "Bảng công việc" : undefined}
-              className={`flex items-center gap-3 py-3 rounded-lg font-semibold text-sm transition-all text-left ${
-                currentPage === "boards" && !selectedBoard
-                  ? "bg-primary-container text-on-primary-container scale-98"
-                  : "text-on-surface-variant hover:bg-surface-container hover:text-on-surface"
-              } ${isSidebarCollapsed ? "justify-center px-0 w-11 mx-auto" : "px-4"}`}
-            >
-              <LayoutDashboard className="h-5 w-5 shrink-0" />
-              {!isSidebarCollapsed && <span>Bảng công việc</span>}
-            </button>
-
-            <button
-              id="tab_settings"
-              onClick={() => {
-                setSelectedBoard(null);
-                setCurrentPage("settings");
-              }}
-              title={isSidebarCollapsed ? "Cài đặt hệ thống" : undefined}
-              className={`flex items-center gap-3 py-3 rounded-lg font-semibold text-sm transition-all text-left ${
-                currentPage === "settings"
-                  ? "bg-primary-container text-on-primary-container scale-98"
-                  : "text-on-surface-variant hover:bg-surface-container hover:text-on-surface"
-              } ${isSidebarCollapsed ? "justify-center px-0 w-11 mx-auto" : "px-4"}`}
-            >
-              <SettingsIcon className="h-5 w-5 shrink-0" />
-              {!isSidebarCollapsed && <span>Cài đặt hệ thống</span>}
-            </button>
-          </div>
-        </div>
-
-        {/* Footer / User Profile & Logout */}
-        <div className={`border-t border-outline-variant pt-4 flex flex-col gap-2.5 ${isSidebarCollapsed ? "items-center" : ""}`}>
-          <div className={`flex items-center gap-3 py-1.5 ${isSidebarCollapsed ? "px-0 justify-center" : "px-4"}`} title={isSidebarCollapsed ? user?.fullName : undefined}>
-            <div className="w-9 h-9 shrink-0 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center font-bold text-sm">
-              {user?.fullName?.charAt(0) || "U"}
-            </div>
-            {!isSidebarCollapsed && (
-              <div className="overflow-hidden">
-                <p className="text-xs font-bold text-on-surface truncate leading-tight">
-                  {user?.fullName || "Người dùng"}
-                </p>
-                <p className="text-[10px] text-on-surface-variant truncate">
-                  {user?.email || "se104@vn.edu"}
-                </p>
-              </div>
-            )}
-          </div>
-
-          <button
-            id="btn_logout"
-            onClick={handleLogout}
-            title={isSidebarCollapsed ? "Đăng xuất" : undefined}
-            className={`bg-error-container text-on-error-container font-semibold text-xs py-2 rounded-lg hover:bg-error hover:text-on-error transition-all duration-200 flex items-center justify-center gap-1.5 cursor-pointer ${
-              isSidebarCollapsed ? "px-0 w-10 h-10 rounded-full mx-auto" : "px-4 w-full"
-            }`}
-          >
-            <LogOut className="h-3.5 w-3.5 shrink-0" />
-            {!isSidebarCollapsed && <span>Đăng xuất</span>}
-          </button>
-        </div>
-      </nav>
 
       {/* 2. CHIEF CONTENT CONTAINER WITH TOP NAV-BAR */}
       <div className="flex-1 flex flex-col h-full overflow-hidden relative">
         
         {/* TOP INTERACTIVE NAVBAR */}
-        <header className="h-[64px] shrink-0 flex justify-between items-center px-6 bg-surface-container-lowest border-b border-outline-variant shadow-sm z-40">
-          
-          {/* Left area: Breadcrumb / Live Search */}
-          <div className="flex-1 max-w-md flex items-center gap-4">
-            {selectedBoard && (
-              <button
-                onClick={() => setSelectedBoard(null)}
-                className="p-1 px-2.5 hover:bg-surface-container rounded-lg text-primary text-xs font-semibold flex items-center gap-1 border border-outline-variant/60"
-              >
-                <ChevronLeft className="h-4 w-4" />
-                <span>Trở lại</span>
-              </button>
-            )}
+        <TopNavBar
+          selectedBoard={selectedBoard}
+          onBack={() => setSelectedBoard(null)}
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          showNotifications={showNotifications}
+          setShowNotifications={setShowNotifications}
+          notifications={notifications}
+          setNotifications={setNotifications}
+          onNavigateSettings={() => setCurrentPage("settings")}
+          user={user}
+        />
 
-            <div className="relative w-full">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-on-surface-variant" />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-4 py-1.5 bg-surface-container-low border border-outline-variant rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-primary-container focus:border-transparent transition-all text-on-surface"
-                placeholder="Tìm kiếm bảng nhanh, nội dung thẻ hoặc nhiệm vụ..."
-              />
-            </div>
-          </div>
-
-          {/* Right Area: Alerts & Interactive Avatar Bubble */}
-          <div className="flex items-center gap-4 relative">
-            
-            {/* Quick API status */}
-            <div className="hidden sm:flex items-center gap-1.5 bg-emerald-50 text-emerald-800 px-2 py-1 rounded text-[10px] font-semibold border border-emerald-200">
-              <div className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse"></div>
-              <span>API Secure Hoạt động</span>
-            </div>
-
-            {/* Notification bell dropdown button */}
-            <div className="relative">
-              <button
-                onClick={() => setShowNotifications(!showNotifications)}
-                className="p-2 text-on-surface-variant hover:bg-surface-container rounded-full transition-all flex items-center justify-center relative border border-outline-variant/60"
-              >
-                <Bell className="h-4.5 w-4.5" />
-                <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-error"></span>
-              </button>
-
-              {showNotifications && (
-                <div className="absolute right-0 mt-2 w-80 bg-surface-container-lowest rounded-xl border border-outline-variant shadow-lg py-3 z-[100] text-sm">
-                  <div className="px-4 pb-2 border-b border-outline-variant flex justify-between items-center">
-                    <span className="font-bold text-xs text-on-surface uppercase tracking-wider">Thông báo dự án</span>
-                    <button onClick={() => setNotifications([])} className="text-[10px] text-primary hover:underline">Xóa tất cả</button>
-                  </div>
-                  <div className="max-h-60 overflow-y-auto">
-                    {notifications.length === 0 ? (
-                      <p className="p-4 text-xs text-center text-on-surface-variant">Không có thông báo mới.</p>
-                    ) : (
-                      notifications.map(n => (
-                        <div key={n.id} className="p-3 border-b border-outline-variant/30 hover:bg-surface-container-low text-xs text-on-surface transition-all">
-                          {n.text}
-                        </div>
-                      ))
-                    )}
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <button
-              onClick={() => setCurrentPage("settings")}
-              className="p-2 text-on-surface-variant hover:bg-surface-container rounded-full transition-all flex items-center justify-center border border-outline-variant/60"
-            >
-              <SettingsIcon className="h-4.5 w-4.5" />
-            </button>
-
-            {/* User Badge */}
-            <div className="flex items-center gap-2 pl-2 border-l border-outline-variant">
-              <div className="w-8 h-8 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center font-bold text-xs cursor-pointer border border-outline-variant">
-                {user?.fullName?.charAt(0) || "U"}
-              </div>
-            </div>
-          </div>
-        </header>
 
         {/* 3. WORKING WORKSPACE PANELS */}
         <main className="flex-1 overflow-y-auto p-8 relative bg-surface">
@@ -700,370 +472,40 @@ export default function App() {
               </div>
             )}
 
-            {/* A. VIEW BOARDS WORKSPACE OVERVIEW (Matching exact screenshot structure) */}
+            {/* A. VIEW BOARDS WORKSPACE OVERVIEW */}
             {currentPage === "boards" && !selectedBoard && (
-              <div className="space-y-10 animate-fade-in">
-                
-                {/* SECTION 1: ĐÃ XEM GẦN ĐÂY */}
-                <section>
-                  <div className="flex items-center gap-2 mb-6 text-on-surface">
-                    <Clock className="h-5 w-5 text-primary" />
-                    <h2 className="text-xl font-bold tracking-tight">Đã xem gần đây</h2>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    {recentBoards.length === 0 ? (
-                      <div className="col-span-full border border-dashed border-outline-variant rounded-xl p-8 text-center text-on-surface-variant text-xs">
-                        Chưa có dự án nào được mở xem gần đây trong phiên này.
-                      </div>
-                    ) : (
-                      recentBoards.map((board) => (
-                        <div
-                          key={`recent-${board.id}`}
-                          onClick={() => handleSelectBoard(board.id)}
-                          className={`group relative h-32 rounded-xl bg-gradient-to-br ${board.bgGradient} shadow-sm border border-outline-variant overflow-hidden cursor-pointer hover:-translate-y-1 transition-all duration-300`}
-                        >
-                          <div className="absolute inset-0 bg-white/40 group-hover:bg-transparent transition-all"></div>
-                          <div className="relative h-full flex flex-col justify-between p-4 z-10">
-                            <div className="flex justify-between items-start gap-1">
-                              <h3 className="font-semibold text-sm text-on-surface line-clamp-2 leading-tight">
-                                {board.title}
-                              </h3>
-                              <div className="flex items-center gap-1 shrink-0 bg-white/40 rounded-lg p-0.5 backdrop-blur-xs">
-                                <button
-                                  onClick={(e) => handleToggleFavorite(e, board)}
-                                  className={`text-on-surface-variant hover:text-amber-500 transition-colors ${board.isFavorite ? "text-amber-500 fill-amber-500" : ""}`}
-                                  title="Ghim yêu thích"
-                                >
-                                  <Star className="h-3.5 w-3.5" />
-                                </button>
-                                <button
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleDeleteBoard(board.id);
-                                  }}
-                                  className="text-on-surface-variant hover:text-red-600 transition-colors p-0.5"
-                                  title="Xóa bảng"
-                                >
-                                  <Trash2 className="h-3.5 w-3.5" />
-                                </button>
-                              </div>
-                            </div>
-                            <span className="text-[10px] text-on-surface-variant bg-white/60 px-2 py-0.5 rounded-full inline-block w-fit backdrop-blur-xs font-semibold">
-                              {board.type === "personal" ? "Cá nhân" : "Nhóm dự án"}
-                            </span>
-                          </div>
-                        </div>
-                      ))
-                    )}
-                  </div>
-                </section>
-
-                {/* SECTION 2: BẢNG CÁ NHÂN & DỰ ÁN */}
-                <section>
-                  <div className="flex items-center gap-2 mb-6">
-                    <UserIcon className="h-5 w-5 text-primary animate-pulse" />
-                    <h2 className="text-xl font-bold tracking-tight text-on-surface">Bảng Cá Nhân</h2>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                    {filteredBoards.filter(b => !b.members || b.members.length <= 1).map((board) => (
-                      <div
-                        key={board.id}
-                        onClick={() => handleSelectBoard(board.id)}
-                        className={`group relative h-32 rounded-xl bg-gradient-to-br ${board.bgGradient} shadow-sm border border-outline-variant overflow-hidden cursor-pointer hover:shadow-md hover:-translate-y-0.5 transition-all duration-300`}
-                      >
-                        <div className="absolute inset-0 bg-white/30 group-hover:bg-transparent transition-all"></div>
-                        <div className="relative h-full flex flex-col p-4 justify-between z-10">
-                          <div className="flex justify-between items-start gap-1">
-                            <h3 className="font-semibold text-sm text-on-surface line-clamp-2 leading-tight">
-                              {board.title}
-                            </h3>
-                            <div className="flex items-center gap-1 shrink-0 bg-white/40 rounded-lg p-0.5 backdrop-blur-xs">
-                              <button
-                                onClick={(e) => handleToggleFavorite(e, board)}
-                                className={`text-on-surface-variant hover:text-amber-500 transition-colors ${board.isFavorite ? "text-amber-500 fill-amber-500" : ""}`}
-                                title="Ghim yêu thích"
-                              >
-                                <Star className="h-3.5 w-3.5" />
-                              </button>
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleDeleteBoard(board.id);
-                                }}
-                                className="text-on-surface-variant hover:text-red-600 transition-colors p-0.5"
-                                title="Xóa bảng"
-                              >
-                                <Trash2 className="h-3.5 w-3.5" />
-                              </button>
-                            </div>
-                          </div>
-                          <div className="flex justify-between items-end">
-                            <span className="px-2 py-0.5 bg-white/60 text-[10px] text-on-surface-variant rounded-full font-semibold backdrop-blur-xs">
-                              {board.type === "personal" ? "Cá nhân" : "Nhóm dự án"}
-                            </span>
-                            <span className="text-[10px] text-on-surface-variant bg-black/5 px-1.5 py-0.5 rounded">
-                              {board.lists?.reduce((acc, l) => acc + l.tasks.length, 0) || 0} thẻ việc
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-
-                    {/* CREATE NEW BOARD CARD TRIGGER */}
-                    <button
-                      onClick={() => setShowCreateModal(true)}
-                      className="group relative h-32 rounded-xl bg-surface-container-low border-2 border-dashed border-outline-variant hover:border-primary-container hover:bg-primary-fixed hover:bg-opacity-10 transition-all duration-300 flex flex-col items-center justify-center gap-2 cursor-pointer"
-                    >
-                      <div className="w-10 h-10 rounded-full bg-surface-container-high group-hover:bg-primary text-on-surface-variant group-hover:text-on-primary flex items-center justify-center transition-colors">
-                        <Plus className="h-5 w-5" />
-                      </div>
-                      <span className="font-semibold text-xs text-on-surface-variant group-hover:text-primary transition-colors">
-                        Tạo bảng mới
-                      </span>
-                    </button>
-                  </div>
-                </section>
-
-                <section>
-                  <div className="flex items-center gap-2 mb-6">
-                    <UsersIcon className="h-5 w-5 text-primary animate-pulse" />
-                    <h2 className="text-xl font-bold tracking-tight text-on-surface">Bảng Nhóm</h2>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                    {filteredBoards.filter(b => b.members && b.members.length > 1).map((board) => (
-                      <div
-                        key={board.id}
-                        onClick={() => handleSelectBoard(board.id)}
-                        className={`group relative h-32 rounded-xl bg-gradient-to-br ${board.bgGradient} shadow-sm border border-outline-variant overflow-hidden cursor-pointer hover:shadow-md hover:-translate-y-0.5 transition-all duration-300`}
-                      >
-                        <div className="absolute inset-0 bg-white/30 group-hover:bg-transparent transition-all"></div>
-                        <div className="relative h-full flex flex-col p-4 justify-between z-10">
-                          <div className="flex justify-between items-start gap-1">
-                            <h3 className="font-semibold text-sm text-on-surface line-clamp-2 leading-tight">
-                              {board.title}
-                            </h3>
-                            <div className="flex items-center gap-1 shrink-0 bg-white/40 rounded-lg p-0.5 backdrop-blur-xs">
-                              <button
-                                onClick={(e) => handleToggleFavorite(e, board)}
-                                className={`text-on-surface-variant hover:text-amber-500 transition-colors ${board.isFavorite ? "text-amber-500 fill-amber-500" : ""}`}
-                                title="Ghim yêu thích"
-                              >
-                                <Star className="h-3.5 w-3.5" />
-                              </button>
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleDeleteBoard(board.id);
-                                }}
-                                className="text-on-surface-variant hover:text-red-600 transition-colors p-0.5"
-                                title="Xóa bảng"
-                              >
-                                <Trash2 className="h-3.5 w-3.5" />
-                              </button>
-                            </div>
-                          </div>
-                          <div className="flex justify-between items-end">
-                            <div className="flex gap-1 items-center">
-                              <span className="px-2 py-0.5 bg-white/60 text-[10px] text-on-surface-variant rounded-full font-semibold backdrop-blur-xs">
-                                Nhóm dự án
-                              </span>
-                              <span className="px-2 py-0.5 bg-primary/20 text-primary text-[10px] rounded-full font-semibold">
-                                {board.members?.length} TV
-                              </span>
-                            </div>
-                            <span className="text-[10px] text-on-surface-variant bg-black/5 px-1.5 py-0.5 rounded">
-                              {board.lists?.reduce((acc, l) => acc + l.tasks.length, 0) || 0} thẻ việc
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </section>
-              </div>
+              <BoardsOverview
+                recentBoards={recentBoards}
+                filteredBoards={filteredBoards}
+                handleSelectBoard={handleSelectBoard}
+                handleToggleFavorite={handleToggleFavorite}
+                handleDeleteBoard={handleDeleteBoard}
+                setShowCreateModal={setShowCreateModal}
+              />
             )}
 
             {/* B. DETAILED BOARD VIEW (KANBAN WORKSPACE) */}
             {currentPage === "boards" && selectedBoard && (
-              <div className="space-y-6 animate-fade-in select-none">
-                
-                {/* Board Header bar */}
-                <div className="bg-surface-container-lowest p-6 rounded-xl border border-outline-variant shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                  <div>
-                    <div className="flex items-center gap-2.5">
-                      <h2 className="text-2xl font-bold tracking-tight text-on-surface">
-                        {selectedBoard.title}
-                      </h2>
-                      <button
-                        onClick={(e) => handleToggleFavorite(e, selectedBoard)}
-                        className={`text-on-surface-variant hover:text-amber-500 transition-colors ${selectedBoard.isFavorite ? "text-amber-500 fill-amber-500" : ""}`}
-                      >
-                        <Star className="h-5 w-5" />
-                      </button>
-                      <span className="px-2 py-0.5 bg-primary-fixed text-on-primary-fixed text-[10px] font-semibold rounded-full uppercase tracking-wider">
-                        {selectedBoard.type === "personal" ? "Cá nhân" : "Nhóm dự án"}
-                      </span>
-                    </div>
-                    <p className="text-xs text-on-surface-variant mt-1.5 max-w-2xl">
-                      {selectedBoard.description || "Bảng quản lý quy trình công việc hiệu năng cao của SE104.Q28."}
-                    </p>
-                  </div>
-
-                  <div className="flex flex-wrap items-center gap-2.5">
-                    {selectedBoard.owner === user?.email && (
-                      <form 
-                        onSubmit={async (e) => {
-                          e.preventDefault();
-                          const input = (e.currentTarget.elements.namedItem("email") as HTMLInputElement);
-                          const email = input.value.trim();
-                          if (!email) return;
-                          
-                          try {
-                            const res = await fetch(`/api/boards/${selectedBoard.id}/members`, {
-                              method: "POST",
-                              headers: { 
-                                "Content-Type": "application/json",
-                                "Authorization": `Bearer ${token}`
-                              },
-                              body: JSON.stringify({ email })
-                            });
-                            
-                            const data = await res.json();
-                            if (!res.ok) {
-                              alert(data.error || "Thêm thành viên thất bại.");
-                              return;
-                            }
-                            
-                            // Rehydrate the board to see new members
-                            alert("Thêm thành viên thành công!");
-                            input.value = "";
-                            const boardRes = await fetch(`/api/boards/${selectedBoard.id}`, {
-                              headers: { "Authorization": `Bearer ${token}` }
-                            });
-                            if (boardRes.ok) {
-                              const boardData = await boardRes.json();
-                              setSelectedBoard(boardData.board);
-                              
-                              // Reload global boards list
-                              const boardsRes = await fetch("/api/boards", { headers: { Authorization: `Bearer ${token}` } });
-                              if (boardsRes.ok) {
-                                const boardsData = await boardsRes.json();
-                                setBoards(boardsData.boards || []);
-                              }
-                            }
-                          } catch (err) {
-                            alert("Có lỗi xảy ra, vui lòng thử lại sau.");
-                          }
-                        }}
-                        className="flex items-center gap-2 bg-surface-container-low px-2 py-1.5 rounded-lg border border-outline-variant/60"
-                      >
-                        <input 
-                          type="email" 
-                          name="email" 
-                          placeholder="Email nhân sự..." 
-                          className="bg-transparent text-xs text-on-surface focus:outline-none w-32 md:w-48 placeholder:text-on-surface-variant px-1"
-                          required 
-                        />
-                        <button 
-                          type="submit" 
-                          className="text-[10px] font-bold bg-primary text-on-primary px-2.5 py-1.5 rounded-md hover:bg-opacity-90 active:scale-95 transition-all flex items-center gap-1 cursor-pointer"
-                        >
-                          <Plus className="h-3 w-3" />
-                          <span>Thêm</span>
-                        </button>
-                      </form>
-                    )}
-
-                    <button
-                      onClick={() => handleDeleteBoard(selectedBoard.id)}
-                      className="text-xs bg-red-50 text-red-600 hover:bg-red-100 px-3 py-2.5 rounded-lg font-semibold flex items-center gap-1.5 transition-all text-left cursor-pointer border border-red-200"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                      <span className="hidden sm:inline">Xóa bảng</span>
-                    </button>
-                  </div>
-                </div>
-
-                {/* Interactive Kanban Grid */}
-                <div className="flex flex-col md:flex-row gap-6 items-start overflow-x-auto pb-6 scrollbar-thin">
-                  {selectedBoard.lists?.map((list: List) => (
-                    <div key={list.id} className="w-full md:w-80 shrink-0">
-                      <KanbanColumn
-                        list={list}
-                        selectedBoard={selectedBoard}
-                        handleAddTask={handleAddTask}
-                        handleDeleteTask={handleDeleteTask}
-                        handleMoveTask={handleMoveTask}
-                        handleDeleteColumn={handleDeleteList}
-                        handleUpdateTask={handleUpdateTaskDetails}
-                      />
-                    </div>
-                  ))}
-                  
-                  {/* Add Column Button Form */}
-                  <div className="w-full md:w-80 shrink-0">
-                    <AddColumnForm handleAddColumn={handleAddList} />
-                  </div>
-                </div>
-              </div>
+              <BoardDetail
+                selectedBoard={selectedBoard}
+                user={user}
+                token={token}
+                handleToggleFavorite={handleToggleFavorite}
+                handleDeleteBoard={handleDeleteBoard}
+                setSelectedBoard={setSelectedBoard}
+                setBoards={setBoards}
+                handleAddTask={handleAddTask}
+                handleDeleteTask={handleDeleteTask}
+                handleMoveTask={handleMoveTask}
+                handleDeleteList={handleDeleteList}
+                handleUpdateTaskDetails={handleUpdateTaskDetails}
+                handleAddList={handleAddList}
+              />
             )}
 
             {/* D. SYSTEM SETTINGS PANEL VIEW */}
             {currentPage === "settings" && (
-              <div className="bg-surface-container-lowest p-6 rounded-xl border border-outline-variant shadow-sm space-y-8 animate-fade-in text-on-surface">
-                
-                <div>
-                  <h2 className="text-xl font-bold tracking-tight text-on-surface">Cài đặt hệ thống SE104.Q28</h2>
-                  <p className="text-xs text-on-surface-variant mt-1">Cấu hình người dùng, dữ liệu bảo mật và quản lý hệ thống lưu trữ dự án.</p>
-                </div>
-
-                {/* Sub setting section 1: Member Profile */}
-                <div className="border-t border-outline-variant/60 pt-6 space-y-4">
-                  <h3 className="font-bold text-sm flex items-center gap-1.5 text-primary">
-                    <UserIcon className="h-4.5 w-4.5" />
-                    <span>Thông tin cá nhân & Quản trị viên</span>
-                  </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-[11px] font-bold text-on-surface-variant uppercase mb-1">Họ và tên</label>
-                      <input
-                        type="text"
-                        disabled
-                        value={user?.fullName || "Khoa Lão Tứ"}
-                        className="w-full p-2 bg-surface-container border border-outline-variant rounded-lg text-xs text-on-surface cursor-not-allowed opacity-80"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-[11px] font-bold text-on-surface-variant uppercase mb-1">Email truy cập</label>
-                      <input
-                        type="email"
-                        disabled
-                        value={user?.email || "khoalaotu40@gmail.com"}
-                        className="w-full p-2 bg-surface-container border border-outline-variant rounded-lg text-xs text-on-surface cursor-not-allowed opacity-80"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Sub setting section 2: Database health check status */}
-                <div className="border-t border-outline-variant/60 pt-6 space-y-4">
-                  <h3 className="font-bold text-sm flex items-center gap-1.5 text-primary">
-                    <Database className="h-4.5 w-4.5" />
-                    <span>Hệ thống dự liệu & File db.json</span>
-                  </h3>
-                  <div className="p-4 bg-surface-container-low rounded-lg border border-outline-variant/65 text-xs text-on-surface-variant leading-relaxed space-y-2">
-                    <p className="font-bold text-on-surface flex items-center gap-1">
-                      <Sparkles className="h-4 w-4 text-amber-500 animate-spin" />
-                      <span>Cơ sở dữ liệu: Hoạt động toàn diện</span>
-                    </p>
-                    <p>Ứng dụng đã được cấu hình lưu trữ dữ liệu vĩnh viễn và tự động đồng bộ hóa thông tin của người dùng qua file cục bộ máy chủ <code className="font-mono bg-white px-1 py-0.5 rounded border">db.json</code>.</p>
-                    <p>Môn học phát triển: <strong className="text-on-surface">SE104.Q28 - Quản lý dự án</strong>.</p>
-                  </div>
-                </div>
-              </div>
+              <SettingsView user={user} />
             )}
 
           </div>
@@ -1072,91 +514,19 @@ export default function App() {
 
       {/* 4. DIALOG / MODAL FOR CREATING NEW BOARD */}
       {showCreateModal && (
-        <div className="fixed inset-0 z-[200] bg-black/50 flex items-center justify-center p-4">
-          <div className="bg-surface-container-lowest border border-outline rounded-xl p-6 max-w-lg w-full space-y-6 shadow-xl animate-scale-up">
-            <div className="flex justify-between items-center border-b border-outline-variant pb-3">
-              <h3 className="text-lg font-bold text-primary flex items-center gap-2">
-                <FolderLock className="h-5 w-5" />
-                <span>Tạo mới bảng quản lý công việc</span>
-              </h3>
-              <button
-                onClick={() => setShowCreateModal(false)}
-                className="text-on-surface-variant hover:text-on-surface text-sm font-bold p-1"
-              >
-                ✕
-              </button>
-            </div>
-
-            <form onSubmit={handleCreateBoard} className="space-y-4">
-              <div>
-                <label className="block text-xs font-bold text-on-surface-variant uppercase mb-1.5">Tên bảng công việc</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="Ví dụ: Kế Hoạch Xây Dựng Hệ Thống"
-                  value={newBoardTitle}
-                  onChange={(e) => setNewBoardTitle(e.target.value)}
-                  className="w-full px-3 py-2 bg-surface-container-low border border-outline-variant rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary text-on-surface"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-on-surface-variant uppercase mb-1.5">Mô tả tóm tắt</label>
-                <textarea
-                  placeholder="Ghi chú chi tiết về mục tiêu hoặc deadline của dự án này..."
-                  value={newBoardDesc}
-                  onChange={(e) => setNewBoardDesc(e.target.value)}
-                  className="w-full px-3 py-2 bg-surface-container-low border border-outline-variant rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary h-20 text-on-surface"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-bold text-on-surface-variant uppercase mb-1.5">Phân loại</label>
-                  <select
-                    value={newBoardType}
-                    onChange={(e) => setNewBoardType(e.target.value as any)}
-                    className="w-full px-3 py-2 bg-surface-container-low border border-outline-variant rounded-lg text-sm text-on-surface focus:outline-none"
-                  >
-                    <option value="personal">🔒 Cá nhân</option>
-                    <option value="team">👥 Nhóm Dự án (Team)</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-on-surface-variant uppercase mb-1.5">Chủ đề & Màu sắc</label>
-                  <select
-                    value={newBoardGradient}
-                    onChange={(e) => setNewBoardGradient(e.target.value)}
-                    className="w-full px-3 py-2 bg-surface-container-low border border-outline-variant rounded-lg text-sm text-on-surface focus:outline-none"
-                  >
-                    {GRADIENTS.map((grade) => (
-                      <option key={grade.value} value={grade.value}>
-                        {grade.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              <div className="flex justify-end gap-2.5 pt-4 border-t border-outline-variant">
-                <button
-                  type="button"
-                  onClick={() => setShowCreateModal(false)}
-                  className="px-4 py-2 border border-outline-variant text-on-surface-variant rounded-lg text-xs font-semibold hover:bg-surface-container-low transition-all cursor-pointer"
-                >
-                  Hủy bỏ
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-primary text-on-primary font-semibold rounded-lg text-xs shadow-sm hover:opacity-90 active:scale-98 transition-all flex items-center gap-1 hover:shadow cursor-pointer"
-                >
-                  <span>Hoàn tất & Khởi tạo</span>
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
+        <CreateBoardModal
+          onClose={() => setShowCreateModal(false)}
+          onSubmit={handleCreateBoard}
+          newBoardTitle={newBoardTitle}
+          setNewBoardTitle={setNewBoardTitle}
+          newBoardDesc={newBoardDesc}
+          setNewBoardDesc={setNewBoardDesc}
+          newBoardType={newBoardType}
+          setNewBoardType={setNewBoardType}
+          newBoardGradient={newBoardGradient}
+          setNewBoardGradient={setNewBoardGradient}
+          gradients={GRADIENTS}
+        />
       )}
 
     </div>

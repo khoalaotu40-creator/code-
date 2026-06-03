@@ -5,6 +5,7 @@
 
 import React, { useState } from "react";
 import { Trash2, Tag, PlusCircle, Edit2, X, Calendar } from "lucide-react";
+import { motion, AnimatePresence } from "motion/react";
 import { Board, List, Task } from "../types";
 
 interface EditTaskModalProps {
@@ -172,6 +173,8 @@ export default function KanbanColumn({
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
 
+  const [isDragOver, setIsDragOver] = useState(false);
+
   const submitNewTask = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newTaskTitle.trim()) return;
@@ -187,8 +190,36 @@ export default function KanbanColumn({
     }
   };
 
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+    setIsDragOver(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    // Only remove drag over if leaving the container
+    if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+      setIsDragOver(false);
+    }
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(false);
+    const taskId = e.dataTransfer.getData("taskId");
+    if (taskId) {
+      handleMoveTask(taskId, list.id);
+    }
+  };
+
   return (
-    <div className="bg-surface-container-low p-4 rounded-xl border border-outline-variant/80 flex flex-col max-h-[700px]">
+    <div 
+      className={`bg-surface-container-low p-4 rounded-xl border border-outline-variant/80 flex flex-col max-h-[700px] transition-colors duration-200 ${isDragOver ? "bg-surface-container border-primary" : ""}`}
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+    >
       {/* List Column Title */}
       <div className="flex justify-between items-center mb-4 pb-2 border-b border-outline-variant/60">
         <div className="flex items-center gap-2">
@@ -218,89 +249,102 @@ export default function KanbanColumn({
             Chưa có đầu lịch công việc.
           </div>
         ) : (
-          list.tasks.map((task: Task) => (
-            <div
-              key={task.id}
-              className="group bg-surface-container-lowest p-3.5 rounded-lg border border-outline-variant shadow-xs hover:shadow-sm hover:border-outline transition-all"
-            >
-              <div className="flex justify-between items-start gap-1 mb-2">
-                <h4 className="text-xs font-bold text-on-surface leading-snug break-words max-w-[80%]">
-                  {task.title}
-                </h4>
-                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all">
-                  <button
-                    onClick={() => setEditingTask(task)}
-                    className="text-on-surface-variant hover:text-primary transition-all p-1 cursor-pointer"
-                    title="Chỉnh sửa công việc"
-                  >
-                    <Edit2 className="h-3.5 w-3.5" />
-                  </button>
-                  <button
-                    onClick={() => handleDeleteTask(list.id, task.id)}
-                    className="text-on-surface-variant hover:text-red-600 transition-all p-1 cursor-pointer"
-                    title="Xóa đầu việc"
-                  >
-                    <Trash2 className="h-3.5 w-3.5" />
-                  </button>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                {task.description && (
-                  <p className="text-[11px] text-on-surface-variant leading-relaxed line-clamp-3 break-words whitespace-pre-wrap">
-                    {task.description}
-                  </p>
-                )}
-
-                <div className="flex flex-wrap items-center gap-1.5">
-                  {/* Priority marker */}
-                  <span
-                    className={`px-1.5 py-0.5 rounded text-[9px] font-bold uppercase ${
-                      task.priority === "high"
-                        ? "bg-red-50 text-red-600"
-                        : task.priority === "medium"
-                        ? "bg-amber-50 text-amber-700"
-                        : "bg-emerald-50 text-emerald-700"
-                    }`}
-                  >
-                    {task.priority === "high" ? "Khẩn" : task.priority === "medium" ? "Trung bình" : "Thấp"}
-                  </span>
-
-                  {/* Label flag */}
-                  {task.label && (
-                    <span className="px-1.5 py-0.5 bg-blue-50 text-blue-700 rounded text-[9px] font-medium flex items-center gap-0.5">
-                      <Tag className="h-2.5 w-2.5" />
-                      <span>{task.label}</span>
-                    </span>
-                  )}
-
-                  {/* Due Date Indicator */}
-                  {task.dueDate && (
-                    <span className="px-1.5 py-0.5 bg-purple-50 text-purple-700 rounded text-[9px] font-medium flex items-center gap-0.5" title={`Hạn chót: ${task.dueDate}`}>
-                      <Calendar className="h-2.5 w-2.5" />
-                      <span>{task.dueDate}</span>
-                    </span>
-                  )}
-                </div>
-              </div>
-
-              {/* Drag-free cross-move controls */}
-              <div className="mt-3.5 pt-2 border-t border-outline-variant/40 flex justify-between items-center text-[10px] text-on-surface-variant">
-                <span>Di chuyển sang:</span>
-                <div className="flex items-center gap-1">
-                  {selectedBoard.lists?.filter(l => l.id !== list.id).map(otherList => (
+          <AnimatePresence>
+            {list.tasks.map((task: Task) => (
+              <motion.div
+                layoutId={task.id}
+                key={task.id}
+                layout
+                initial={{ opacity: 0, y: 15, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                draggable={true}
+                onDragStart={(e: React.DragEvent) => {
+                  e.dataTransfer.setData("taskId", task.id);
+                  e.dataTransfer.effectAllowed = "move";
+                }}
+                className="group bg-surface-container-lowest p-3.5 rounded-lg border border-outline-variant shadow-xs hover:shadow-sm hover:border-outline transition-all cursor-grab active:cursor-grabbing"
+              >
+                <div className="flex justify-between items-start gap-1 mb-2">
+                  <h4 className="text-xs font-bold text-on-surface leading-snug break-words max-w-[80%]">
+                    {task.title}
+                  </h4>
+                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all">
                     <button
-                      key={otherList.id}
-                      onClick={() => handleMoveTask(task.id, otherList.id)}
-                      className="px-1.5 py-0.5 bg-surface-container hover:bg-primary-container hover:text-on-primary-container rounded transition-all text-[9px] font-semibold cursor-pointer"
+                      onClick={() => setEditingTask(task)}
+                      className="text-on-surface-variant hover:text-primary transition-all p-1 cursor-pointer"
+                      title="Chỉnh sửa công việc"
                     >
-                      {otherList.title}
+                      <Edit2 className="h-3.5 w-3.5" />
                     </button>
-                  ))}
+                    <button
+                      onClick={() => handleDeleteTask(list.id, task.id)}
+                      className="text-on-surface-variant hover:text-red-600 transition-all p-1 cursor-pointer"
+                      title="Xóa đầu việc"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
                 </div>
-              </div>
-            </div>
-          ))
+
+                <div className="space-y-2">
+                  {task.description && (
+                    <p className="text-[11px] text-on-surface-variant leading-relaxed line-clamp-3 break-words whitespace-pre-wrap">
+                      {task.description}
+                    </p>
+                  )}
+
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    {/* Priority marker */}
+                    <span
+                      className={`px-1.5 py-0.5 rounded text-[9px] font-bold uppercase ${
+                        task.priority === "high"
+                          ? "bg-red-50 text-red-600"
+                          : task.priority === "medium"
+                          ? "bg-amber-50 text-amber-700"
+                          : "bg-emerald-50 text-emerald-700"
+                      }`}
+                    >
+                      {task.priority === "high" ? "Khẩn" : task.priority === "medium" ? "Trung bình" : "Thấp"}
+                    </span>
+
+                    {/* Label flag */}
+                    {task.label && (
+                      <span className="px-1.5 py-0.5 bg-blue-50 text-blue-700 rounded text-[9px] font-medium flex items-center gap-0.5">
+                        <Tag className="h-2.5 w-2.5" />
+                        <span>{task.label}</span>
+                      </span>
+                    )}
+
+                    {/* Due Date Indicator */}
+                    {task.dueDate && (
+                      <span className="px-1.5 py-0.5 bg-purple-50 text-purple-700 rounded text-[9px] font-medium flex items-center gap-0.5" title={`Hạn chót: ${task.dueDate}`}>
+                        <Calendar className="h-2.5 w-2.5" />
+                        <span>{task.dueDate}</span>
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Drag-free cross-move controls */}
+                <div className="mt-3.5 pt-2 border-t border-outline-variant/40 flex justify-between items-center text-[10px] text-on-surface-variant">
+                  <span>Di chuyển sang:</span>
+                  <div className="flex items-center gap-1">
+                    {selectedBoard.lists?.filter(l => l.id !== list.id).map(otherList => (
+                      <button
+                        key={otherList.id}
+                        onClick={() => handleMoveTask(task.id, otherList.id)}
+                        className="px-1.5 py-0.5 bg-surface-container hover:bg-primary-container hover:text-on-primary-container rounded transition-all text-[9px] font-semibold cursor-pointer"
+                      >
+                        {otherList.title}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </AnimatePresence>
         )}
       </div>
 

@@ -30,13 +30,6 @@ interface NewsFeedViewProps {
   boards?: Board[];
 }
 
-const PRESET_IMAGES = [
-  { url: "https://images.unsplash.com/photo-1531403009284-440f080d1e12?auto=format&fit=crop&w=800&q=80", label: "Mô hình ERD" },
-  { url: "https://images.unsplash.com/photo-1542831371-29b0f74f9713?auto=format&fit=crop&w=800&q=80", label: "Giao diện Code" },
-  { url: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=800&q=80", label: "Báo cáo Tiến độ" },
-  { url: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=800&q=80", label: "Họp Nhóm" }
-];
-
 export default function NewsFeedView({ user, token, boards = [] }: NewsFeedViewProps) {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
@@ -57,7 +50,6 @@ export default function NewsFeedView({ user, token, boards = [] }: NewsFeedViewP
   const [selectedTag, setSelectedTag] = useState("Thông báo");
   const [customTag, setCustomTag] = useState("");
   const [postImage, setPostImage] = useState<string | null>(null);
-  const [showImagePresets, setShowImagePresets] = useState(false);
   const [isSubmittingPost, setIsSubmittingPost] = useState(false);
 
   // Sync default select option with first workspace board if available
@@ -74,20 +66,6 @@ export default function NewsFeedView({ user, token, boards = [] }: NewsFeedViewP
   // Comments active expand states
   const [expandedComments, setExpandedComments] = useState<Record<string, boolean>>({});
   const [newCommentText, setNewCommentText] = useState<Record<string, string>>({});
-
-  // Upcoming Milestones Mock (Facebook sidebar style)
-  const milestones = [
-    { id: 1, title: "Nộp dự thảo ERD & CSDL", days: "Còn 2 ngày", date: "04/06", urgent: true },
-    { id: 2, title: "Hoàn thiện API Đăng nhập", days: "Còn 5 ngày", date: "07/06", urgent: false },
-    { id: 3, title: "Họp nhóm tổng kết tuần 12", days: "Còn 6 ngày", date: "08/06", urgent: false }
-  ];
-
-  // Hot activities statistic
-  const stats = [
-    { label: "Báo cáo hoàn thành", val: "85%", icon: CheckCircle2, color: "text-emerald-500" },
-    { label: "Công việc khẩn cấp", val: "3 thẻ", icon: AlertCircle, color: "text-red-500" },
-    { label: "Tương tác tuần này", val: "+140", icon: Flame, color: "text-amber-500" }
-  ];
 
   // Fetch posts from backend
   const fetchPosts = async () => {
@@ -115,6 +93,21 @@ export default function NewsFeedView({ user, token, boards = [] }: NewsFeedViewP
       fetchPosts();
     }
   }, [token]);
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 2 * 1024 * 1024) {
+        alert("Lỗi: Kích thước ảnh không được vượt quá 2MB.");
+        return;
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPostImage(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   // Handle Post Submit
   const handleCreatePost = async (e: React.FormEvent) => {
@@ -149,7 +142,6 @@ export default function NewsFeedView({ user, token, boards = [] }: NewsFeedViewP
       setContent("");
       setCustomTag("");
       setPostImage(null);
-      setShowImagePresets(false);
     } catch (err: any) {
       alert(err.message || "Đăng bài thất bại.");
     } finally {
@@ -305,10 +297,10 @@ export default function NewsFeedView({ user, token, boards = [] }: NewsFeedViewP
       </div>
 
       {/* Main Body Layout Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+      <div className="max-w-3xl mx-auto space-y-6 items-start">
         
         {/* LEFT COLUMN: Feed & Creation (2 cols on large screen) */}
-        <div className="lg:col-span-2 space-y-6">
+        <div className="w-full space-y-6">
           
           {/* Create Post Block (styled exactly like Facebook Card) */}
           <div className="bg-surface-container-lowest border border-outline-variant rounded-2xl p-5 shadow-xs">
@@ -329,7 +321,7 @@ export default function NewsFeedView({ user, token, boards = [] }: NewsFeedViewP
 
             {/* Selected attached image or attachment indicators */}
             {postImage && (
-              <div className="mt-4 relative rounded-xl overflow-hidden max-h-48 border border-outline-variant">
+              <div className="mt-4 relative rounded-xl overflow-hidden max-h-48 border border-outline-variant scale-100 transition-transform">
                 <img
                   src={postImage}
                   alt="Attachment preview"
@@ -338,31 +330,10 @@ export default function NewsFeedView({ user, token, boards = [] }: NewsFeedViewP
                 <button
                   type="button"
                   onClick={() => setPostImage(null)}
-                  className="absolute top-2 right-2 p-1 bg-black/75 hover:bg-black text-white rounded-full text-[10px] uppercase font-bold cursor-pointer"
+                  className="absolute top-2 right-2 p-1 bg-black/75 hover:bg-black text-white rounded-full text-[10px] uppercase font-bold cursor-pointer transition-colors"
                 >
                   Xóa ảnh x
                 </button>
-              </div>
-            )}
-
-            {/* Expand Image attachment presets */}
-            {showImagePresets && (
-              <div className="mt-3.5 p-3.5 bg-surface-container rounded-xl border border-outline border-dashed">
-                <p className="text-[10px] font-bold text-on-surface h-4 mb-2">Chọn ảnh mẫu từ thư viện để đính kèm:</p>
-                <div className="grid grid-cols-4 gap-2">
-                  {PRESET_IMAGES.map((img) => (
-                    <button
-                      key={img.label}
-                      type="button"
-                      onClick={() => setPostImage(img.url)}
-                      className={`h-14 rounded-lg overflow-hidden border-2 relative cursor-pointer ${postImage === img.url ? "border-primary" : "border-transparent"}`}
-                      title={img.label}
-                    >
-                      <img src={img.url} className="w-full h-full object-cover" alt={img.label} />
-                      <div className="absolute bottom-0 inset-x-0 bg-black/60 text-[8px] text-white py-0.5 text-center truncate">{img.label}</div>
-                    </button>
-                  ))}
-                </div>
               </div>
             )}
 
@@ -370,14 +341,22 @@ export default function NewsFeedView({ user, token, boards = [] }: NewsFeedViewP
             <div className="mt-4 pt-3.5 border-t border-outline-variant/60 flex flex-wrap gap-2 items-center justify-between">
               <div className="flex items-center gap-1.5">
                 {/* Image Trigger */}
-                <button
-                  type="button"
-                  onClick={() => setShowImagePresets(!showImagePresets)}
-                  className="p-2 hover:bg-surface-container rounded-lg text-on-surface-variant text-xs flex items-center gap-1.5 font-medium transition-all cursor-pointer"
-                >
-                  <ImageIcon className="h-4 w-4 text-emerald-500" />
-                  <span className="hidden sm:inline">Ảnh đính kèm</span>
-                </button>
+                <div className="relative">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    title="Tải ảnh từ máy"
+                  />
+                  <button
+                    type="button"
+                    className="p-2 hover:bg-surface-container rounded-lg text-on-surface-variant text-xs flex items-center gap-1.5 font-medium transition-all"
+                  >
+                    <ImageIcon className="h-4 w-4 text-emerald-500" />
+                    <span className="hidden sm:inline">Ảnh đính kèm</span>
+                  </button>
+                </div>
 
                 {/* Tag Selection Dropdown */}
                 <div className="flex items-center bg-surface-container-low px-2 py-1 rounded-lg border border-outline-variant/40">
@@ -617,75 +596,6 @@ export default function NewsFeedView({ user, token, boards = [] }: NewsFeedViewP
               </AnimatePresence>
             </div>
           )}
-
-        </div>
-
-        {/* RIGHT COLUMN: Sidebar Stats & Milestones (1 col on large screen) */}
-        <div className="space-y-6">
-          
-          {/* Active Statistics Card Widget */}
-          <div className="bg-surface-container-lowest border border-outline-variant rounded-2xl p-5 shadow-xs">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-on-surface-variant/80 mb-4 flex items-center gap-1.5">
-              <TrendingUp className="h-4.5 w-4.5 text-primary" />
-              <span>Tiến độ tổng hợp</span>
-            </h3>
-
-            <div className="grid grid-cols-1 gap-3.5">
-              {stats.map((stat, i) => (
-                <div key={i} className="flex items-center justify-between p-3 rounded-xl bg-surface-container-low border border-outline-variant/40">
-                  <div className="flex items-center gap-2.5">
-                    <span className={`p-1.5 rounded-lg bg-surface-container-high ${stat.color}`}>
-                      <stat.icon className="h-4.5 w-4.5" />
-                    </span>
-                    <span className="text-[11px] font-semibold text-on-surface-variant">{stat.label}</span>
-                  </div>
-                  <span className="text-xs font-bold text-on-surface">{stat.val}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Upcoming tasks milestones Facebook Style */}
-          <div className="bg-surface-container-lowest border border-outline-variant rounded-2xl p-5 shadow-xs">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-on-surface-variant/80 flex items-center gap-1.5">
-                <Bell className="h-4.5 w-4.5 text-amber-500 animate-bounce" />
-                <span>Sự kiện & Deadline sắp tới</span>
-              </h3>
-            </div>
-
-            <div className="space-y-3.5">
-              {milestones.map((m) => (
-                <div 
-                  key={m.id}
-                  className="flex items-start gap-3 p-2.5 rounded-xl hover:bg-surface-container transition-all"
-                >
-                  <div className={`p-2 rounded-lg text-center font-bold text-xs select-none ${
-                    m.urgent ? "bg-red-50 text-red-600 border border-red-200" : "bg-primary-container text-on-primary-container"
-                  }`}>
-                    {m.date}
-                  </div>
-                  <div className="min-w-0 flex-grow">
-                    <h4 className="text-xs font-bold text-on-surface truncate leading-snug">
-                      {m.title}
-                    </h4>
-                    <p className={`text-[10px] font-semibold mt-1 flex items-center gap-1 ${
-                      m.urgent ? "text-red-500" : "text-on-surface-variant"
-                    }`}>
-                      <span>•</span>
-                      {m.days}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-            
-            <div className="mt-4 pt-3.5 border-t border-outline-variant/60">
-              <p className="text-[10px] text-center text-on-surface-variant leading-relaxed">
-                Tất cả các thời điểm được tự động đồng bộ theo múi giờ địa phương Việt Nam (GMT+7).
-              </p>
-            </div>
-          </div>
 
         </div>
 
