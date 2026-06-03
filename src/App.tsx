@@ -342,7 +342,6 @@ export default function App() {
   // List operation: Delete column (List)
   const handleDeleteList = (listId: string) => {
     if (!selectedBoard) return;
-    if (!window.confirm("Bạn có chắc chắn muốn xóa tất cả thẻ công việc và cột này không?")) return;
 
     const updatedLists = selectedBoard.lists?.filter(l => l.id !== listId) || [];
     const updatedBoard = { ...selectedBoard, lists: updatedLists };
@@ -421,9 +420,6 @@ export default function App() {
 
   // Board operation: Delete Board
   const handleDeleteBoard = async (boardId: string) => {
-    if (!window.confirm("Bạn có chắc chắn muốn xóa vĩnh viễn bảng công việc này?")) {
-      return;
-    }
     try {
       const response = await fetch(`/api/boards/${boardId}`, {
         method: "DELETE",
@@ -700,7 +696,7 @@ export default function App() {
             {/* A. NEW FACEBOOK-STYLE HOMEPAGE NEWS FEED PANEL */}
             {currentPage === "feed" && (
               <div className="animate-fade-in">
-                <NewsFeedView user={user} token={token} />
+                <NewsFeedView user={user} token={token} boards={boards} />
               </div>
             )}
 
@@ -729,16 +725,29 @@ export default function App() {
                         >
                           <div className="absolute inset-0 bg-white/40 group-hover:bg-transparent transition-all"></div>
                           <div className="relative h-full flex flex-col justify-between p-4 z-10">
-                            <div className="flex justify-between items-start">
+                            <div className="flex justify-between items-start gap-1">
                               <h3 className="font-semibold text-sm text-on-surface line-clamp-2 leading-tight">
                                 {board.title}
                               </h3>
-                              <button
-                                onClick={(e) => handleToggleFavorite(e, board)}
-                                className={`text-on-surface-variant hover:text-amber-500 transition-colors ${board.isFavorite ? "text-amber-500 fill-amber-500" : ""}`}
-                              >
-                                <Star className="h-4 w-4" />
-                              </button>
+                              <div className="flex items-center gap-1 shrink-0 bg-white/40 rounded-lg p-0.5 backdrop-blur-xs">
+                                <button
+                                  onClick={(e) => handleToggleFavorite(e, board)}
+                                  className={`text-on-surface-variant hover:text-amber-500 transition-colors ${board.isFavorite ? "text-amber-500 fill-amber-500" : ""}`}
+                                  title="Ghim yêu thích"
+                                >
+                                  <Star className="h-3.5 w-3.5" />
+                                </button>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleDeleteBoard(board.id);
+                                  }}
+                                  className="text-on-surface-variant hover:text-red-600 transition-colors p-0.5"
+                                  title="Xóa bảng"
+                                >
+                                  <Trash2 className="h-3.5 w-3.5" />
+                                </button>
+                              </div>
                             </div>
                             <span className="text-[10px] text-on-surface-variant bg-white/60 px-2 py-0.5 rounded-full inline-block w-fit backdrop-blur-xs font-semibold">
                               {board.type === "personal" ? "Cá nhân" : "Nhóm dự án"}
@@ -770,12 +779,25 @@ export default function App() {
                             <h3 className="font-semibold text-sm text-on-surface line-clamp-2 leading-tight">
                               {board.title}
                             </h3>
-                            <button
-                              onClick={(e) => handleToggleFavorite(e, board)}
-                              className={`shrink-0 text-on-surface-variant hover:text-amber-500 transition-colors ${board.isFavorite ? "text-amber-500 fill-amber-500" : ""}`}
-                            >
-                              <Star className="h-4 w-4" />
-                            </button>
+                            <div className="flex items-center gap-1 shrink-0 bg-white/40 rounded-lg p-0.5 backdrop-blur-xs">
+                              <button
+                                onClick={(e) => handleToggleFavorite(e, board)}
+                                className={`text-on-surface-variant hover:text-amber-500 transition-colors ${board.isFavorite ? "text-amber-500 fill-amber-500" : ""}`}
+                                title="Ghim yêu thích"
+                              >
+                                <Star className="h-3.5 w-3.5" />
+                              </button>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDeleteBoard(board.id);
+                                }}
+                                className="text-on-surface-variant hover:text-red-600 transition-colors p-0.5"
+                                title="Xóa bảng"
+                              >
+                                <Trash2 className="h-3.5 w-3.5" />
+                              </button>
+                            </div>
                           </div>
                           <div className="flex justify-between items-end">
                             <span className="px-2 py-0.5 bg-white/60 text-[10px] text-on-surface-variant rounded-full font-semibold backdrop-blur-xs">
@@ -823,12 +845,25 @@ export default function App() {
                             <h3 className="font-semibold text-sm text-on-surface line-clamp-2 leading-tight">
                               {board.title}
                             </h3>
-                            <button
-                              onClick={(e) => handleToggleFavorite(e, board)}
-                              className={`shrink-0 text-on-surface-variant hover:text-amber-500 transition-colors ${board.isFavorite ? "text-amber-500 fill-amber-500" : ""}`}
-                            >
-                              <Star className="h-4 w-4" />
-                            </button>
+                            <div className="flex items-center gap-1 shrink-0 bg-white/40 rounded-lg p-0.5 backdrop-blur-xs">
+                              <button
+                                onClick={(e) => handleToggleFavorite(e, board)}
+                                className={`text-on-surface-variant hover:text-amber-500 transition-colors ${board.isFavorite ? "text-amber-500 fill-amber-500" : ""}`}
+                                title="Ghim yêu thích"
+                              >
+                                <Star className="h-3.5 w-3.5" />
+                              </button>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDeleteBoard(board.id);
+                                }}
+                                className="text-on-surface-variant hover:text-red-600 transition-colors p-0.5"
+                                title="Xóa bảng"
+                              >
+                                <Trash2 className="h-3.5 w-3.5" />
+                              </button>
+                            </div>
                           </div>
                           <div className="flex justify-between items-end">
                             <div className="flex gap-1 items-center">
@@ -942,15 +977,13 @@ export default function App() {
                       </form>
                     )}
 
-                    {selectedBoard.owner === user?.email && (
-                      <button
-                        onClick={() => handleDeleteBoard(selectedBoard.id)}
-                        className="text-xs bg-red-50 text-red-600 hover:bg-red-100 px-3 py-2.5 rounded-lg font-semibold flex items-center gap-1.5 transition-all text-left cursor-pointer border border-red-200"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                        <span className="hidden sm:inline">Xóa bảng</span>
-                      </button>
-                    )}
+                    <button
+                      onClick={() => handleDeleteBoard(selectedBoard.id)}
+                      className="text-xs bg-red-50 text-red-600 hover:bg-red-100 px-3 py-2.5 rounded-lg font-semibold flex items-center gap-1.5 transition-all text-left cursor-pointer border border-red-200"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                      <span className="hidden sm:inline">Xóa bảng</span>
+                    </button>
                   </div>
                 </div>
 
@@ -965,6 +998,7 @@ export default function App() {
                         handleDeleteTask={handleDeleteTask}
                         handleMoveTask={handleMoveTask}
                         handleDeleteColumn={handleDeleteList}
+                        handleUpdateTask={handleUpdateTaskDetails}
                       />
                     </div>
                   ))}

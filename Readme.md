@@ -115,3 +115,40 @@ export interface PostComment {
   createdAt: string;      
 }
 ```
+
+## 🔄 Luồng dữ liệu hệ thống (Data Flow)
+
+Dưới đây là sơ đồ luồng dữ liệu cơ bản của hệ thống giữa giao diện người dùng (Client), máy chủ (Express API) và cơ sở dữ liệu nội bộ (JSON).
+
+```mermaid
+sequenceDiagram
+    participant User as 💻 Người Dùng (Client App)
+    participant Auth as 🔐 Auth API (/api/auth)
+    participant Board as 🗂️ Board API (/api/boards)
+    participant Post as 📰 Post API (/api/posts)
+    participant DB as 📄 db.json (Database)
+    
+    %% Quy trình Đăng nhập / Xác thực
+    User->>Auth: POST /api/login (User Credentials)
+    Auth->>DB: Đọc tập tin & kiểm tra User
+    DB-->>Auth: Trả kết quả dữ liệu
+    Auth-->>User: Cấp phát Session Token (SESSIONS Map)
+
+    %% Quy trình lấy Bảng công việc
+    User->>Board: GET /api/boards (Gửi kèm Token Header)
+    Board->>DB: Trích xuất danh sách Boards
+    DB-->>Board: Trả về Boards schema
+    Board-->>User: Lọc về danh sách board của User (Personal & Team)
+
+    %% Cập nhật Board (Kanban kéo thả)
+    User->>Board: PUT /api/boards/:id (Danh sách list/task mới)
+    Board->>DB: Ghi đè file với dữ liệu JSON mới
+    DB-->>Board: Lưu thành công
+    Board-->>User: Trả về Board JSON mới đã đồng bộ
+    
+    %% Tương tác Bảng tin
+    User->>Post: POST /api/posts/:id/comment (Gửi nội dung bình luận)
+    Post->>DB: Thêm Comment vào mảng post.comments
+    DB-->>Post: Lưu thành công
+    Post-->>User: Cập nhật giao diện Feed
+```

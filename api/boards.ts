@@ -136,8 +136,10 @@ router.delete("/:id", requireAuth, (req, res) => {
     return res.status(404).json({ error: "Không tìm thấy bảng để xóa." });
   }
 
-  if (db.boards[index].owner && db.boards[index].owner !== user.email) {
-    return res.status(403).json({ error: "Chỉ chủ sở hữu mới có quyền xóa bảng này." });
+  const board = db.boards[index];
+  // Verify access before allowing deletion
+  if (board.owner && board.owner !== user.email && !board.members?.includes(user.email)) {
+    return res.status(403).json({ error: "Bạn không có quyền xóa bảng này." });
   }
 
   db.boards.splice(index, 1);

@@ -4,8 +4,145 @@
  */
 
 import React, { useState } from "react";
-import { Trash2, Tag, PlusCircle } from "lucide-react";
+import { Trash2, Tag, PlusCircle, Edit2, X, Calendar } from "lucide-react";
 import { Board, List, Task } from "../types";
+
+interface EditTaskModalProps {
+  task: Task;
+  onClose: () => void;
+  onSave: (updates: Partial<Task>) => void;
+}
+
+function EditTaskModal({ task, onClose, onSave }: EditTaskModalProps) {
+  const [title, setTitle] = useState(task.title || "");
+  const [description, setDescription] = useState(task.description || "");
+  const [priority, setPriority] = useState<"low" | "medium" | "high">(task.priority || "medium");
+  const [label, setLabel] = useState(task.label || "");
+  const [dueDate, setDueDate] = useState(task.dueDate || "");
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSave({
+      title,
+      description: description.trim(),
+      priority,
+      label: label.trim() || undefined,
+      dueDate: dueDate || undefined,
+    });
+    onClose();
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4 backdrop-blur-[2px]">
+      <div className="bg-surface-container-high border border-outline-variant/80 rounded-xl w-full max-w-md shadow-xl overflow-hidden animate-in fade-in zoom-in-95 duration-100">
+        {/* Modal Header */}
+        <div className="flex justify-between items-center px-5 py-4 border-b border-outline-variant/50">
+          <h3 className="text-sm font-bold text-on-surface flex items-center gap-2">
+            Chỉnh sửa thẻ công việc
+          </h3>
+          <button
+            type="button"
+            onClick={onClose}
+            className="text-on-surface-variant hover:text-on-surface transition-colors p-1 rounded-lg hover:bg-surface-container-highest cursor-pointer"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+
+        {/* Modal Content */}
+        <form onSubmit={handleSubmit} className="p-5 space-y-4">
+          <div>
+            <label className="block text-[10px] font-bold text-on-surface-variant uppercase tracking-wider mb-1.5">
+              Tiêu đề công việc <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              className="w-full p-2.5 bg-surface-container-lowest border border-outline-variant rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-primary text-on-surface"
+              required
+              placeholder="Nhập tiêu đề công việc..."
+            />
+          </div>
+
+          <div>
+            <label className="block text-[10px] font-bold text-on-surface-variant uppercase tracking-wider mb-1.5">
+              Mô tả chi tiết
+            </label>
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              rows={3}
+              className="w-full p-2.5 bg-surface-container-lowest border border-outline-variant rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-primary text-on-surface resize-none"
+              placeholder="Giải thích chi tiết hoặc yêu cầu cụ thể..."
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-[10px] font-bold text-on-surface-variant uppercase tracking-wider mb-1.5">
+                Mức độ ưu tiên
+              </label>
+              <select
+                value={priority}
+                onChange={(e) => setPriority(e.target.value as any)}
+                className="w-full p-2 bg-surface-container-lowest border border-outline-variant rounded-lg text-xs text-on-surface focus:outline-none focus:ring-1 focus:ring-primary"
+              >
+                <option value="low font-medium">Thấp</option>
+                <option value="medium font-medium">Trung bình</option>
+                <option value="high font-bold">Khẩn cấp</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-[10px] font-bold text-on-surface-variant uppercase tracking-wider mb-1.5">
+                Nhãn (Label)
+              </label>
+              <input
+                type="text"
+                value={label}
+                onChange={(e) => setLabel(e.target.value)}
+                placeholder="Ví dụ: SEO, API..."
+                className="w-full p-2 bg-surface-container-lowest border border-outline-variant rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-primary text-on-surface"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-[10px] font-bold text-on-surface-variant uppercase tracking-wider mb-1.5">
+              Hạn hoàn thành (Due Date)
+            </label>
+            <div className="relative">
+              <input
+                type="date"
+                value={dueDate}
+                onChange={(e) => setDueDate(e.target.value)}
+                className="w-full p-2.5 bg-surface-container-lowest border border-outline-variant rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-primary text-on-surface"
+              />
+            </div>
+          </div>
+
+          {/* Modal Footer */}
+          <div className="flex gap-2 justify-end pt-3 border-t border-outline-variant/40">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2 text-xs font-bold text-on-surface-variant hover:bg-surface-container-highest rounded-lg transition-all cursor-pointer"
+            >
+              Hủy bỏ
+            </button>
+            <button
+              type="submit"
+              className="px-4 py-2 bg-primary text-on-primary text-xs font-bold rounded-lg hover:bg-opacity-90 active:scale-95 transition-all cursor-pointer"
+            >
+              Lưu thay đổi
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
 
 interface KanbanColumnProps {
   key?: string;
@@ -15,6 +152,7 @@ interface KanbanColumnProps {
   handleDeleteTask: (listId: string, taskId: string) => void;
   handleMoveTask: (taskId: string, targetListId: string) => void;
   handleDeleteColumn?: (listId: string) => void;
+  handleUpdateTask?: (listId: string, taskId: string, updates: Partial<Task>) => void;
 }
 
 export default function KanbanColumn({
@@ -23,7 +161,8 @@ export default function KanbanColumn({
   handleAddTask,
   handleDeleteTask,
   handleMoveTask,
-  handleDeleteColumn
+  handleDeleteColumn,
+  handleUpdateTask
 }: KanbanColumnProps) {
   if (!selectedBoard) return null;
 
@@ -31,6 +170,7 @@ export default function KanbanColumn({
   const [newTaskPriority, setNewTaskPriority] = useState<"low" | "medium" | "high">("medium");
   const [newTaskLabel, setNewTaskLabel] = useState("");
   const [showAddForm, setShowAddForm] = useState(false);
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
 
   const submitNewTask = (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,6 +179,12 @@ export default function KanbanColumn({
     setNewTaskTitle("");
     setNewTaskLabel("");
     setShowAddForm(false);
+  };
+
+  const handleSaveUpdatedTask = (updates: Partial<Task>) => {
+    if (editingTask && handleUpdateTask) {
+      handleUpdateTask(list.id, editingTask.id, updates);
+    }
   };
 
   return (
@@ -78,21 +224,30 @@ export default function KanbanColumn({
               className="group bg-surface-container-lowest p-3.5 rounded-lg border border-outline-variant shadow-xs hover:shadow-sm hover:border-outline transition-all"
             >
               <div className="flex justify-between items-start gap-1 mb-2">
-                <h4 className="text-xs font-bold text-on-surface leading-snug">
+                <h4 className="text-xs font-bold text-on-surface leading-snug break-words max-w-[80%]">
                   {task.title}
                 </h4>
-                <button
-                  onClick={() => handleDeleteTask(list.id, task.id)}
-                  className="opacity-0 group-hover:opacity-100 text-on-surface-variant hover:text-red-600 transition-all p-1 cursor-pointer"
-                  title="Xóa đầu việc"
-                >
-                  <Trash2 className="h-3.5 w-3.5" />
-                </button>
+                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all">
+                  <button
+                    onClick={() => setEditingTask(task)}
+                    className="text-on-surface-variant hover:text-primary transition-all p-1 cursor-pointer"
+                    title="Chỉnh sửa công việc"
+                  >
+                    <Edit2 className="h-3.5 w-3.5" />
+                  </button>
+                  <button
+                    onClick={() => handleDeleteTask(list.id, task.id)}
+                    className="text-on-surface-variant hover:text-red-600 transition-all p-1 cursor-pointer"
+                    title="Xóa đầu việc"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </button>
+                </div>
               </div>
 
               <div className="space-y-2">
                 {task.description && (
-                  <p className="text-[11px] text-on-surface-variant leading-relaxed line-clamp-2">
+                  <p className="text-[11px] text-on-surface-variant leading-relaxed line-clamp-3 break-words whitespace-pre-wrap">
                     {task.description}
                   </p>
                 )}
@@ -114,8 +269,16 @@ export default function KanbanColumn({
                   {/* Label flag */}
                   {task.label && (
                     <span className="px-1.5 py-0.5 bg-blue-50 text-blue-700 rounded text-[9px] font-medium flex items-center gap-0.5">
-                      <Tag className="h-2 w-2" />
+                      <Tag className="h-2.5 w-2.5" />
                       <span>{task.label}</span>
+                    </span>
+                  )}
+
+                  {/* Due Date Indicator */}
+                  {task.dueDate && (
+                    <span className="px-1.5 py-0.5 bg-purple-50 text-purple-700 rounded text-[9px] font-medium flex items-center gap-0.5" title={`Hạn chót: ${task.dueDate}`}>
+                      <Calendar className="h-2.5 w-2.5" />
+                      <span>{task.dueDate}</span>
                     </span>
                   )}
                 </div>
@@ -198,6 +361,15 @@ export default function KanbanColumn({
           </button>
         )}
       </div>
+
+      {/* Render Edit Task Modal */}
+      {editingTask && (
+        <EditTaskModal
+          task={editingTask}
+          onClose={() => setEditingTask(null)}
+          onSave={handleSaveUpdatedTask}
+        />
+      )}
     </div>
   );
 }

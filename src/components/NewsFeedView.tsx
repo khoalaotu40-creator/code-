@@ -22,11 +22,12 @@ import {
   Share2
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
-import { User, Post, PostComment } from "../types";
+import { User, Post, PostComment, Board } from "../types";
 
 interface NewsFeedViewProps {
   user: User | null;
   token: string | null;
+  boards?: Board[];
 }
 
 const PRESET_IMAGES = [
@@ -36,20 +37,35 @@ const PRESET_IMAGES = [
   { url: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=800&q=80", label: "Họp Nhóm" }
 ];
 
-const POPULAR_TAGS = ["Tất cả", "Thông báo", "Đồ Án Cuối Kỳ", "Báo cáo", "Database", "Backend", "Ý tưởng"];
-
-export default function NewsFeedView({ user, token }: NewsFeedViewProps) {
+export default function NewsFeedView({ user, token, boards = [] }: NewsFeedViewProps) {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
   
+  // Dynamic tags generated from active workspace boards of the user
+  const POPULAR_TAGS = [
+    "Tất cả",
+    "Thông báo",
+    ...boards.map(b => b.title),
+    "Báo cáo",
+    "Database",
+    "Backend"
+  ];
+
   // New Post States
   const [content, setContent] = useState("");
-  const [selectedTag, setSelectedTag] = useState("Đồ Án Cuối Kỳ");
+  const [selectedTag, setSelectedTag] = useState("Thông báo");
   const [customTag, setCustomTag] = useState("");
   const [postImage, setPostImage] = useState<string | null>(null);
   const [showImagePresets, setShowImagePresets] = useState(false);
   const [isSubmittingPost, setIsSubmittingPost] = useState(false);
+
+  // Sync default select option with first workspace board if available
+  useEffect(() => {
+    if (boards && boards.length > 0) {
+      setSelectedTag(boards[0].title);
+    }
+  }, [boards]);
 
   // Search & Filters
   const [searchQuery, setSearchQuery] = useState("");
