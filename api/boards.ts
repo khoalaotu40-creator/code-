@@ -147,4 +147,42 @@ router.delete("/:id", requireAuth, (req, res) => {
   res.json({ success: true, message: "Đã xóa bảng thành công." });
 });
 
+router.post("/:id/chat", requireAuth, (req, res) => {
+  const { content } = req.body;
+  if (!content || !content.trim()) {
+    return res.status(400).json({ error: "Nội dung chat không được trống." });
+  }
+
+  const db = getDb();
+  const user = (req as any).user;
+  const board = db.boards.find((b: Board) => b.id === req.params.id);
+
+  if (!board) {
+    return res.status(404).json({ error: "Không tìm thấy bảng công việc." });
+  }
+
+  if (board.owner !== user.email && !board.members?.includes(user.email)) {
+    return res.status(403).json({ error: "Bạn không có quyền chat trong bảng này." });
+  }
+
+  if (!board.chatMessages) {
+    board.chatMessages = [];
+  }
+
+  const newMessage = {
+    id: `msg-${Date.now()}-${Math.random().toString(36).substring(2,6)}`,
+    sender: {
+      fullName: user.fullName || "User",
+      email: user.email
+    },
+    content: content.trim(),
+    createdAt: new Date().toISOString()
+  };
+
+  board.chatMessages.push(newMessage);
+  saveDb(db);
+
+  res.json({ success: true, message: newMessage });
+});
+
 export default router;

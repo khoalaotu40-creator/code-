@@ -37,6 +37,17 @@ export interface Board {
   lists?: List[]; // Kanban lists/columns
   owner: string; // email of the owner
   members?: string[]; // emails of members
+  chatMessages?: ChatMessage[];
+}
+
+export interface ChatMessage {
+  id: string;
+  sender: {
+    fullName: string;
+    email: string;
+  };
+  content: string;
+  createdAt: string;
 }
 
 export interface PostComment {

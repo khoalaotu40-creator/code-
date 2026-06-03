@@ -1,8 +1,9 @@
-import React from "react";
-import { Star, Trash2, Plus } from "lucide-react";
+import React, { useState } from "react";
+import { Star, Trash2, Plus, MessageSquare } from "lucide-react";
 import { Board, List, User } from "../types";
 import KanbanColumn from "../components/KanbanColumn";
 import AddColumnForm from "./AddColumnForm";
+import TeamChat from "./TeamChat";
 
 interface BoardDetailProps {
   selectedBoard: Board;
@@ -35,11 +36,28 @@ export default function BoardDetail({
   handleUpdateTaskDetails,
   handleAddList
 }: BoardDetailProps) {
+  const [showChat, setShowChat] = useState(false);
+  const isTeam = selectedBoard.type === "team" || (selectedBoard.members && selectedBoard.members.length > 1);
+
+  const fetchBoardData = async () => {
+    try {
+      const boardRes = await fetch(`/api/boards/${selectedBoard.id}`, {
+        headers: { "Authorization": `Bearer ${token}` }
+      });
+      if (boardRes.ok) {
+        const boardData = await boardRes.json();
+        setSelectedBoard(boardData.board);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   return (
-    <div className="space-y-6 animate-fade-in select-none">
+    <div className="space-y-6 animate-fade-in select-none h-full flex flex-col">
       
       {/* Board Header bar */}
-      <div className="bg-surface-container-lowest p-6 rounded-xl border border-outline-variant shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <div className="bg-surface-container-lowest p-6 rounded-xl border border-outline-variant shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shrink-0">
         <div>
           <div className="flex items-center gap-2.5">
             <h2 className="text-2xl font-bold tracking-tight text-on-surface">
@@ -61,6 +79,16 @@ export default function BoardDetail({
         </div>
 
         <div className="flex flex-wrap items-center gap-2.5">
+          {isTeam && (
+            <button
+              onClick={() => setShowChat(!showChat)}
+              className={`text-xs px-3 py-2.5 rounded-lg font-semibold flex items-center gap-1.5 transition-all cursor-pointer border ${showChat ? "bg-primary text-on-primary border-primary" : "bg-primary-container text-on-primary-container border-outline-variant/60 hover:bg-primary/20"}`}
+            >
+              <MessageSquare className="h-4 w-4" />
+              <span className="hidden sm:inline">Khung Chat Nhóm</span>
+            </button>
+          )}
+
           {selectedBoard.owner === user?.email && (
             <form 
               onSubmit={async (e) => {
@@ -88,19 +116,13 @@ export default function BoardDetail({
                   // Rehydrate the board to see new members
                   alert("Thêm thành viên thành công!");
                   input.value = "";
-                  const boardRes = await fetch(`/api/boards/${selectedBoard.id}`, {
-                    headers: { "Authorization": `Bearer ${token}` }
-                  });
-                  if (boardRes.ok) {
-                    const boardData = await boardRes.json();
-                    setSelectedBoard(boardData.board);
-                    
-                    // Reload global boards list
-                    const boardsRes = await fetch("/api/boards", { headers: { Authorization: `Bearer ${token}` } });
-                    if (boardsRes.ok) {
-                      const boardsData = await boardsRes.json();
-                      setBoards(boardsData.boards || []);
-                    }
+                  await fetchBoardData();
+                  
+                  // Reload global boards list
+                  const boardsRes = await fetch("/api/boards", { headers: { Authorization: `Bearer ${token}` } });
+                  if (boardsRes.ok) {
+                    const boardsData = await boardsRes.json();
+                    setBoards(boardsData.boards || []);
                   }
                 } catch (err) {
                   alert("Có lỗi xảy ra, vui lòng thử lại sau.");
@@ -136,9 +158,9 @@ export default function BoardDetail({
       </div>
 
       {/* Interactive Kanban Grid */}
-      <div className="flex flex-col md:flex-row gap-6 items-start overflow-x-auto pb-6 scrollbar-thin">
+      <div className="flex-1 flex flex-col md:flex-row gap-6 items-start overflow-x-auto pb-6 scrollbar-thin">
         {selectedBoard.lists?.map((list: List) => (
-          <div key={list.id} className="w-full md:w-80 shrink-0">
+          <div key={list.id} className="w-full md:w-80 shrink-0 h-full">
             <KanbanColumn
               list={list}
               selectedBoard={selectedBoard}
@@ -155,6 +177,17 @@ export default function BoardDetail({
         <div className="w-full md:w-80 shrink-0">
           <AddColumnForm handleAddColumn={handleAddList} />
         </div>
+        
+        {showChat && isTeam && (
+          <div className="w-full md:w-80 shrink-0 h-full">
+             <TeamChat 
+               board={selectedBoard} 
+               user={user} 
+               token={token} 
+               onRefreshBoard={fetchBoardData} 
+             />
+          </div>
+        )}
       </div>
     </div>
   );
