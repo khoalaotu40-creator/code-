@@ -505,7 +505,7 @@ export default function App() {
 
             {/* D. SYSTEM SETTINGS PANEL VIEW */}
             {currentPage === "settings" && (
-              <SettingsView user={user} />
+              <SettingsView user={user} token={token} setUser={setUser} />
             )}
 
           </div>

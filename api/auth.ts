@@ -46,7 +46,7 @@ router.post("/login", (req, res) => {
             username: dbUser.username,
             email: dbUser.email,
             fullName: dbUser.fullName,
-            avatar: dbUser.fullName.charAt(0)
+            avatar: dbUser.avatar || dbUser.fullName.charAt(0)
         };
     } else {
         sessionUser = {
@@ -55,6 +55,7 @@ router.post("/login", (req, res) => {
           email: username.includes("@") ? username : `${username}@se104.vn`,
           fullName: username === "khoalaotu40@gmail.com" ? "Khoa Lão Tứ" : (username === "admin" ? "Super Admin" : "SE104 Student")
         };
+        sessionUser.avatar = sessionUser.fullName.charAt(0);
     }
     
     SESSIONS.set(token, sessionUser);
@@ -126,6 +127,39 @@ router.post("/logout", (req, res) => {
     SESSIONS.delete(token);
   }
   return res.json({ success: true, message: "Đăng xuất thành công" });
+});
+
+router.put("/avatar", requireAuth, (req, res) => {
+  const { avatarBase64 } = req.body;
+  if (!avatarBase64) {
+    return res.status(400).json({ error: "Thiếu dữ liệu ảnh." });
+  }
+
+  const user = (req as any).user;
+  const db = getDb();
+
+  // Find user in db
+  let dbUser = db.users.find((u: any) => u.username === user.username);
+  
+  // If default user not explicitly in db yet, add them so we can persist their avatar
+  if (!dbUser) {
+    dbUser = {
+      username: user.username,
+      password: "password123", // default or dummy since they matched default check
+      email: user.email,
+      fullName: user.fullName
+    };
+    db.users.push(dbUser);
+  }
+
+  // Update avatar
+  dbUser.avatar = avatarBase64;
+  saveDb(db);
+
+  // Update session
+  user.avatar = avatarBase64;
+  
+  return res.json({ success: true, user });
 });
 
 export default router;

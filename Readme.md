@@ -1,6 +1,37 @@
-# SE104.Q28 Project Management System
+# SE104.Q28 Quản Lý Dự Án & Công Việc (Project Management System)
 
-Hệ thống quản lý công việc và bảng tin dành cho sinh viên SE104.Q28, với chức năng quản lý bảng Kanban (Cá nhân/Nhóm) và tính năng theo dõi bảng tin (News Feed).
+Đây là hệ thống quản lý công việc và bảng tin dành cho sinh viên SE104.Q28, nổi bật với chức năng quản lý bảng Kanban (Cá nhân/Nhóm) trực quan và tính năng theo dõi giao tiếp nội bộ qua Bảng tin (News Feed) chuyên nghiệp.
+
+## 👥 Nhóm Thực Hiện & Giảng Viên Hướng Dẫn
+- **Tác giả:**
+  - Trương Phạm Đăng Khoa - 24520846
+  - Lâm Ngọc Thiên Phúc - 24521378
+  - Nguyễn Trần Đăng Khoa - 24520834
+- **Giáo viên hướng dẫn:** TS. Tiến
+
+## ✨ Chức năng nổi bật
+- **Quản lý công việc tiện lợi:** Tổ chức bảng Kanban khoa học, giao diện kéo/thả mượt mà.
+- **Trung tâm điều phối linh hoạt:** Hệ thống Bảng tin giúp theo dõi công việc quá hạn, công việc cá nhân và cập nhật thông báo chung qua các thẻ (Widget) nhanh chóng.
+- **Lịch sử hoạt động chi tiết:** Lưu trữ thao tác và thảo luận (Audit log) trực tiếp trên từng thẻ Kanban, minh bạch quá trình thực hiện.
+- **Phân quyền và giao việc:** Thêm thành viên, phân công công việc thông minh thông qua danh sách thành viên cụ thể.
+
+## 🎨 Giao diện trực quan
+- Hệ thống hỗ trợ thị giác người dùng bằng các cảnh báo khẩn cấp khi đến hạn chót (thay đổi trạng thái màu sắc), hiển thị hình ảnh đại diện (avatar) của thành viên trực tiếp trên thẻ công việc. Layout tổng quan dạng bảng và danh sách tinh gọn, đảm bảo không gian rộng rãi, dễ dàng trong việc thao tác và quản lý.
+
+## 🚀 Công nghệ sử dụng
+- **Frontend:** React, TypeScript, Tailwind CSS, Lucide Icons.
+- **Backend:** Node.js, Express, TypeScript.
+- **Cơ sở dữ liệu:** File-based lưu trữ cục bộ (`db.json`) chuyên dụng cho tốc độ, gọn nhẹ và nguyên mẫu.
+
+## 🛠 Hướng dẫn cài đặt
+1. Khởi tạo dự án và Node.js.
+2. **Cài đặt thư viện:** Chạy lệnh `npm install`
+3. **Khởi chạy hệ thống (Dev):** Chạy lệnh `npm run dev`
+4. **Build Code Sản Phẩm:** Chạy lệnh `npm run build` sau đó `npm run start`
+
+## 🏗 Sơ đồ hệ thống & 🗄 Sơ đồ cơ sở dữ liệu
+(Xem giải nghĩa chi tiết ở phần cấu trúc dữ liệu và luồng dữ liệu bên dưới)
+
 
 ## 📂 Cấu trúc thư mục (File Structure)
 

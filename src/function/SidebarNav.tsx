@@ -106,9 +106,13 @@ export default function SidebarNav({
 
       <div className={`border-t border-outline-variant pt-4 flex flex-col gap-2.5 ${isSidebarCollapsed ? "items-center" : ""}`}>
         <div className={`flex items-center gap-3 py-1.5 ${isSidebarCollapsed ? "px-0 justify-center" : "px-4"}`} title={isSidebarCollapsed ? user?.fullName : undefined}>
-          <div className="w-9 h-9 shrink-0 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center font-bold text-sm">
-            {user?.fullName?.charAt(0) || "U"}
-          </div>
+          {user?.avatar && user.avatar.length > 10 ? (
+             <img src={user.avatar} alt="Avatar" className="w-9 h-9 shrink-0 rounded-full border border-outline-variant object-cover" />
+          ) : (
+            <div className="w-9 h-9 shrink-0 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center font-bold text-sm">
+              {user?.avatar || user?.fullName?.charAt(0) || "U"}
+            </div>
+          )}
           {!isSidebarCollapsed && (
             <div className="overflow-hidden">
               <p className="text-xs font-bold text-on-surface truncate leading-tight">

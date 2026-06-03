@@ -78,8 +78,13 @@ export default function TopNavBar({
                   <p className="p-4 text-xs text-center text-on-surface-variant">Không có thông báo mới.</p>
                 ) : (
                   notifications.map(n => (
-                    <div key={n.id} className="p-3 border-b border-outline-variant/30 hover:bg-surface-container-low text-xs text-on-surface transition-all">
-                      {n.text}
+                    <div 
+                      key={n.id} 
+                      onClick={() => alert("Tính năng điều hướng mở trực tiếp pop-up Thẻ Công Việc (Task Modal) đang được phát triển...")}
+                      className="p-3 border-b border-outline-variant/30 hover:bg-surface-container-low text-xs text-on-surface transition-all cursor-pointer group"
+                    >
+                      <p className="group-hover:text-primary transition-colors">{n.text}</p>
+                      <p className="text-[10px] text-on-surface-variant mt-1 font-medium">Nhấp để mở chi tiết công việc</p>
                     </div>
                   ))
                 )}
@@ -96,9 +101,13 @@ export default function TopNavBar({
         </button>
 
         <div className="flex items-center gap-2 pl-2 border-l border-outline-variant">
-          <div className="w-8 h-8 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center font-bold text-xs cursor-pointer border border-outline-variant">
-            {user?.fullName?.charAt(0) || "U"}
-          </div>
+          {user?.avatar && user.avatar.length > 10 ? (
+            <img src={user.avatar} alt="Avatar" className="w-8 h-8 rounded-full border border-outline-variant object-cover cursor-pointer" />
+          ) : (
+            <div className="w-8 h-8 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center font-bold text-xs cursor-pointer border border-outline-variant">
+              {user?.avatar || user?.fullName?.charAt(0) || "U"}
+            </div>
+          )}
         </div>
       </div>
     </header>

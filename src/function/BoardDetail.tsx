@@ -169,6 +169,7 @@ export default function BoardDetail({
               handleMoveTask={handleMoveTask}
               handleDeleteColumn={handleDeleteList}
               handleUpdateTask={handleUpdateTaskDetails}
+              currentUser={user}
             />
           </div>
         ))}

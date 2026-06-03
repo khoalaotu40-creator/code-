@@ -11,7 +11,7 @@ import apiRoutes from "./api";
 const app = express();
 const PORT = 3000;
 
-app.use(express.json());
+app.use(express.json({ limit: "50mb" }));
 
 // Main API Router
 app.use("/api", apiRoutes);

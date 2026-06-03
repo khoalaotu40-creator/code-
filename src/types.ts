@@ -11,6 +11,17 @@ export interface User {
   role: string;
 }
 
+export interface ActivityLog {
+  id: string;
+  user: {
+    fullName: string;
+    avatar?: string;
+  };
+  type?: "comment" | "system";
+  action: string;
+  createdAt: string;
+}
+
 export interface Task {
   id: string;
   title: string;
@@ -18,6 +29,12 @@ export interface Task {
   dueDate?: string; // YYYY-MM-DD
   priority?: "low" | "medium" | "high";
   label?: string; // e.g. "Cá nhân", "Quan trọng"
+  assignee?: {
+    fullName: string;
+    avatar?: string;
+    email: string;
+  };
+  activities?: ActivityLog[];
 }
 
 export interface List {

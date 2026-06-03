@@ -23,6 +23,12 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { User, Post, PostComment, Board } from "../types";
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
+import "dayjs/locale/vi";
+
+dayjs.extend(relativeTime);
+dayjs.locale("vi");
 
 interface NewsFeedViewProps {
   user: User | null;
@@ -66,6 +72,15 @@ export default function NewsFeedView({ user, token, boards = [] }: NewsFeedViewP
   // Comments active expand states
   const [expandedComments, setExpandedComments] = useState<Record<string, boolean>>({});
   const [newCommentText, setNewCommentText] = useState<Record<string, string>>({});
+
+  // Real-time time updater
+  const [, setTick] = useState(0);
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      setTick(tick => tick + 1);
+    }, 60000); // Tự động cập nhật giao diện mỗi 60 giây
+    return () => clearInterval(intervalId);
+  }, []);
 
   // Fetch posts from backend
   const fetchPosts = async () => {
@@ -235,18 +250,7 @@ export default function NewsFeedView({ user, token, boards = [] }: NewsFeedViewP
   });
 
   const getRelativeTime = (isoString: string) => {
-    const postTime = new Date(isoString).getTime();
-    const diff = Date.now() - postTime;
-    
-    const minutes = Math.floor(diff / (1000 * 60));
-    if (minutes < 1) return "Vừa xong";
-    if (minutes < 60) return `${minutes} phút trước`;
-    
-    const hours = Math.floor(diff / (1000 * 60 * 60));
-    if (hours < 24) return `${hours} giờ trước`;
-    
-    const days = Math.floor(hours / 24);
-    return `${days} ngày trước`;
+    return dayjs(isoString).fromNow();
   };
 
   return (
@@ -279,8 +283,11 @@ export default function NewsFeedView({ user, token, boards = [] }: NewsFeedViewP
         </div>
       </div>
 
-      {/* Hashtag Quick Filters (like facebook pill filters) */}
+      {/* Board & Tag Quick Filters */}
       <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+        <span className="text-xs font-bold text-on-surface-variant flex items-center gap-1.5 whitespace-nowrap px-1">
+          <Tag className="w-3.5 h-3.5" /> Lọc không gian:
+        </span>
         {POPULAR_TAGS.map((tag) => (
           <button
             key={tag}
@@ -291,16 +298,16 @@ export default function NewsFeedView({ user, token, boards = [] }: NewsFeedViewP
                 : "bg-surface-container-low hover:bg-surface-container text-on-surface-variant border border-outline-variant/60"
             }`}
           >
-            #{tag}
+            {tag === "Tất cả" || tag === "Thông báo" || tag === "Báo cáo" || tag === "Database" || tag === "Backend" ? `#${tag}` : tag}
           </button>
         ))}
       </div>
 
       {/* Main Body Layout Grid */}
-      <div className="max-w-3xl mx-auto space-y-6 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start w-full">
         
-        {/* LEFT COLUMN: Feed & Creation (2 cols on large screen) */}
-        <div className="w-full space-y-6">
+        {/* LEFT COLUMN: Feed & Creation */}
+        <div className="lg:col-span-2 space-y-6 w-full">
           
           {/* Create Post Block (styled exactly like Facebook Card) */}
           <div className="bg-surface-container-lowest border border-outline-variant rounded-2xl p-5 shadow-xs">
@@ -435,9 +442,13 @@ export default function NewsFeedView({ user, token, boards = [] }: NewsFeedViewP
                       {/* Post Header */}
                       <div className="p-4 flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center font-bold text-sm border border-outline-variant">
-                            {post.author.fullName?.trim()?.charAt(0) || "U"}
-                          </div>
+                          {post.author.avatar && post.author.avatar.length > 10 ? (
+                            <img src={post.author.avatar} alt="Avatar" className="w-10 h-10 rounded-full border border-outline-variant object-cover" />
+                          ) : (
+                            <div className="w-10 h-10 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center font-bold text-sm border border-outline-variant">
+                              {post.author.avatar || post.author.fullName?.trim()?.charAt(0) || "U"}
+                            </div>
+                          )}
                           <div>
                             <div className="flex items-center gap-2">
                               <h4 className="text-xs font-bold text-on-surface leading-tight hover:underline cursor-pointer">
@@ -539,9 +550,13 @@ export default function NewsFeedView({ user, token, boards = [] }: NewsFeedViewP
                             <div className="space-y-3">
                               {post.comments.map((comment: PostComment) => (
                                 <div key={comment.id} className="flex gap-2.5 items-start">
-                                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">
-                                    {comment.author.fullName?.charAt(0) || "U"}
-                                  </div>
+                                  {comment.author.avatar && comment.author.avatar.length > 10 ? (
+                                    <img src={comment.author.avatar} alt="Avatar" className="w-7 h-7 sm:w-8 sm:h-8 rounded-full border border-outline-variant object-cover mt-0.5 shrink-0" />
+                                  ) : (
+                                    <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">
+                                      {comment.author.avatar || comment.author.fullName?.charAt(0) || "U"}
+                                    </div>
+                                  )}
                                   <div className="flex-1 bg-surface-container-lowest p-3 rounded-2xl border border-outline-variant/60 shadow-2xs max-w-lg">
                                     <div className="flex justify-between items-center gap-1 mb-1">
                                       <span className="text-[11px] font-bold text-on-surface">
@@ -597,6 +612,52 @@ export default function NewsFeedView({ user, token, boards = [] }: NewsFeedViewP
             </div>
           )}
 
+        </div>
+
+        {/* RIGHT COLUMN: Widgets */}
+        <div className="hidden lg:block lg:col-span-1 space-y-6">
+          <div className="bg-surface-container-lowest border border-outline-variant rounded-2xl shadow-xs overflow-hidden">
+            <div className="p-4 border-b border-outline-variant bg-surface-container-low/50 flex items-center justify-between">
+              <h3 className="font-bold text-sm text-on-surface flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 text-orange-500" />
+                Hạn chót khẩn cấp
+              </h3>
+              <span className="text-[10px] bg-orange-100 text-orange-700 font-bold px-2 py-0.5 rounded-full">3</span>
+            </div>
+            <div className="p-4 space-y-3">
+              {[
+                { title: "Nộp báo cáo giữa kỳ", board: "Đồ án SE104.Q28", time: "Hôm nay, 23:59" },
+                { title: "Review Code Backend", board: "Dự án cá nhân", time: "Ngày mai, 12:00" },
+                { title: "Thiết kế Entity DB", board: "Đồ án hệ cơ sở", time: "2 ngày nữa" }
+              ].map((task, idx) => (
+                <div key={idx} className="flex flex-col gap-1 p-3 bg-surface-container-low rounded-xl border border-outline-variant/50 hover:bg-surface-container cursor-pointer transition-colors group">
+                  <span className="text-xs font-bold text-on-surface group-hover:text-primary transition-colors">{task.title}</span>
+                  <div className="flex justify-between items-center mt-1 text-[10px] font-medium">
+                    <span className="text-on-surface-variant flex items-center gap-1">
+                      <Tag className="w-3 h-3" /> {task.board}
+                    </span>
+                    <span className="text-orange-600 flex items-center gap-1">
+                      <Clock className="w-3 h-3" /> {task.time}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="bg-surface-container-lowest border border-outline-variant rounded-2xl shadow-xs overflow-hidden">
+            <div className="p-4 border-b border-outline-variant bg-surface-container-low/50">
+              <h3 className="font-bold text-sm text-on-surface flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                Công việc của tôi (Đang làm)
+              </h3>
+            </div>
+            <div className="p-4 space-y-3">
+              <div className="text-center py-6 text-on-surface-variant/70 text-xs">
+                Chưa có công việc nào đang xử lý.
+              </div>
+            </div>
+          </div>
         </div>
 
       </div>
