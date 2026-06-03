@@ -1,9 +1,6 @@
 import fs from "fs";
 import path from "path";
-import { EventEmitter } from "events";
 import { Board, User, Post } from "../src/types";
-
-export const dbEvents = new EventEmitter();
 
 export const DB_FILE = path.join(process.cwd(), "db.json");
 
@@ -229,7 +226,6 @@ export function getDb() {
 export function saveDb(data: any) {
   try {
     fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2), "utf-8");
-    dbEvents.emit("db_changed");
   } catch (error) {
     console.error("Database saving error:", error);
   }

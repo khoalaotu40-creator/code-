@@ -7,27 +7,14 @@ import express from "express";
 import path from "path";
 import { createServer as createViteServer } from "vite";
 import apiRoutes from "./api";
-import { createServer } from "http";
-import { Server } from "socket.io";
-import { dbEvents } from "./config/db";
 
 const app = express();
 const PORT = 3000;
-const httpServer = createServer(app);
-const io = new Server(httpServer, {
-  cors: {
-    origin: "*",
-  },
-});
 
 app.use(express.json({ limit: "50mb" }));
 
 // Main API Router
 app.use("/api", apiRoutes);
-
-dbEvents.on("db_changed", () => {
-  io.emit("db_changed");
-});
 
 // --- Server and Frontend Mounting ---
 
@@ -47,7 +34,7 @@ async function startServer() {
     });
   }
 
-  httpServer.listen(PORT, "0.0.0.0", () => {
+  app.listen(PORT, "0.0.0.0", () => {
     console.log(`Server is booted! Running on http://localhost:${PORT}`);
   });
 }
