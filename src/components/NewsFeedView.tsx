@@ -4,6 +4,7 @@
  */
 
 import React, { useState, useEffect } from "react";
+import { io } from "socket.io-client";
 import { 
   Heart, 
   MessageCircle, 
@@ -106,6 +107,25 @@ export default function NewsFeedView({ user, token, boards = [] }: NewsFeedViewP
   useEffect(() => {
     if (token) {
       fetchPosts();
+      
+      const socket = io();
+      socket.on("db_changed", () => {
+        // Refetch posts silently
+        fetch("/api/posts", {
+          headers: {
+            "Authorization": `Bearer ${token}`
+          }
+        }).then(async res => {
+          if (res.ok) {
+            const data = await res.json();
+            setPosts(data.posts || []);
+          }
+        });
+      });
+
+      return () => {
+        socket.disconnect();
+      };
     }
   }, [token]);
 

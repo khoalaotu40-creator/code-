@@ -4,6 +4,7 @@
  */
 
 import React, { useState, useEffect } from "react";
+import { io } from "socket.io-client";
 import {
   Search,
   Bell,
@@ -98,8 +99,24 @@ export default function App() {
   useEffect(() => {
     if (token) {
       fetchUserAndBoards();
+
+      const socket = io();
+      
+      socket.on("db_changed", () => {
+        // Refetch everything when another client modifies the server db
+        // To prevent overriding local pending edits immediately, we might just refetch
+        // In a real app we'd merge smartly.
+        fetchUserAndBoards();
+        if (selectedBoard) {
+            handleSelectBoard(selectedBoard.id);
+        }
+      });
+
+      return () => {
+        socket.disconnect();
+      };
     }
-  }, [token]);
+  }, [token, selectedBoard?.id]);
 
   const fetchUserAndBoards = async () => {
     setLoading(true);
