@@ -21,8 +21,10 @@ Dự án này là một ứng dụng Full-stack sử dụng React, Vite, Tailwin
    Lệnh này sẽ lấy các dependencies từ `package.json` và cài đặt chúng vào thư mục `node_modules`.
 
 3. **Cấu hình môi trường (Biến môi trường - Env variables)**:
-   - Nếu dự án có yêu cầu biến môi trường như API Key, hãy sao chép tệp `.env.example` (nếu có) thành tệp tên là `.env`.
-   - Điền các giá trị (chẳng hạn như token, API key) vào file `.env`. Nếu dự án không dùng biến môi trường, bỏ qua bước này.
+   - Hệ thống có tích hợp AI Chatbot (Quản gia dự án). Bạn cần có API Key từ Google Gemini.
+   - Sao chép tệp `.env.example` thành tệp tên là `.env`.
+   - Mở file `.env` và điền key của bạn: `GEMINI_API_KEY=your_api_key_here`. 
+   - Nếu dự án không dùng AI chatbot, bạn có thể bỏ qua quá trình điền API key, nhưng chatbot sẽ ở trạng thái chờ cấu hình.
 
 4. **Khởi chạy ứng dụng**:
    ```bash

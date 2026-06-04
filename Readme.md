@@ -11,7 +11,8 @@
 
 ## ✨ Chức năng nổi bật
 - **Quản lý công việc tiện lợi:** Tổ chức bảng Kanban khoa học, giao diện kéo/thả mượt mà.
-- **Trung tâm điều phối linh hoạt:** Hệ thống Bảng tin giúp theo dõi công việc quá hạn, công việc cá nhân và cập nhật thông báo chung qua các thẻ (Widget) nhanh chóng.
+- **Trợ lý dự án AI (Quản gia dự án):** Tích hợp Gemini AI dưới dạng chatbot, phân tích thông minh các công việc đến hạn, trễ hạn, ưu tiên cao và tin tức trong hệ thống để tự động báo cáo cho người dùng theo ngữ cảnh cá nhân.
+- **Trung tâm điều phối linh hoạt:** Hệ thống Bảng tin giúp theo dõi công việc quá hạn, công việc cá nhân và cập nhật thông báo chung qua các thẻ (Widget) nhanh chóng, kèm lịch (Calendar) trực quan.
 - **Lịch sử hoạt động chi tiết:** Lưu trữ thao tác và thảo luận (Audit log) trực tiếp trên từng thẻ Kanban, minh bạch quá trình thực hiện.
 - **Phân quyền và giao việc:** Thêm thành viên, phân công công việc thông minh thông qua danh sách thành viên cụ thể.
 

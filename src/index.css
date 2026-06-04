@@ -83,3 +83,26 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(118, 118, 134, 0.4);
 }
+
+.markdown-body-chat p {
+  margin-bottom: 0.5rem;
+}
+.markdown-body-chat p:last-child {
+  margin-bottom: 0;
+}
+.markdown-body-chat ul {
+  list-style-type: disc;
+  padding-left: 1.25rem;
+  margin-bottom: 0.5rem;
+}
+.markdown-body-chat ol {
+  list-style-type: decimal;
+  padding-left: 1.25rem;
+  margin-bottom: 0.5rem;
+}
+.markdown-body-chat strong {
+  font-weight: 600;
+}
+.markdown-body-chat a {
+  text-decoration: underline;
+}

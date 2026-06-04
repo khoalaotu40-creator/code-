@@ -40,7 +40,10 @@ export default function MiniCalendar({ boards }: MiniCalendarProps) {
 
   // Helper to check if a day has tasks
   const getTasksForDay = (day: number) => {
-    const dateStr = new Date(year, month, day).toISOString().split('T')[0];
+    const d = new Date(year, month, day);
+    const tzOffset = d.getTimezoneOffset() * 60000;
+    const dateStr = (new Date(d.getTime() - tzOffset)).toISOString().slice(0, 10);
+
     return allTasks.filter(t => {
       // Very simple inclusion check (if dateStr is between start and due)
       const tStart = t.startDate || t.dueDate;
@@ -94,20 +97,29 @@ export default function MiniCalendar({ boards }: MiniCalendarProps) {
                     const dayTasks = getTasksForDay(day);
                     const hasTasks = dayTasks.length > 0;
                     
+                    const d = new Date(year, month, day);
+                    const tzOffset = d.getTimezoneOffset() * 60000;
+                    const dateStr = (new Date(d.getTime() - tzOffset)).toISOString().slice(0, 10);
+                    const hasDeadline = dayTasks.some(t => t.dueDate === dateStr);
+                    
                     return (
                         <div 
                           key={day} 
                           onClick={() => setSelectedDay(day)}
                           className={`
                               relative flex items-center justify-center h-8 w-8 mx-auto rounded-full text-sm font-medium cursor-pointer transition-all
-                              ${isSelected ? "bg-primary text-on-primary font-bold shadow-md transform scale-110" : "hover:bg-surface-container"}
-                              ${isToday && !isSelected ? "text-primary border border-primary/50" : ""}
-                              ${!isSelected && !isToday ? "text-on-surface" : ""}
+                              ${isSelected && !hasDeadline ? "bg-primary text-on-primary font-bold shadow-md transform scale-110" : ""}
+                              ${isSelected && hasDeadline ? "bg-red-500 text-white font-bold shadow-md transform scale-110" : ""}
+                              ${!isSelected ? "hover:bg-surface-container" : ""}
+                              ${isToday && !isSelected && !hasDeadline ? "text-primary border border-primary/50" : ""}
+                              ${isToday && !isSelected && hasDeadline ? "text-red-500 border border-red-500/50" : ""}
+                              ${!isSelected && !isToday && hasDeadline ? "text-red-500 font-bold" : ""}
+                              ${!isSelected && !isToday && !hasDeadline ? "text-on-surface" : ""}
                           `}
                         >
                             {day}
                             {hasTasks && !isSelected && (
-                                <div className="absolute -bottom-1 w-1.5 h-1.5 bg-primary rounded-full"></div>
+                                <div className={`absolute -bottom-1 w-1.5 h-1.5 rounded-full ${hasDeadline ? 'bg-red-500' : 'bg-primary'}`}></div>
                             )}
                         </div>
                     );
@@ -146,7 +158,7 @@ export default function MiniCalendar({ boards }: MiniCalendarProps) {
                        <Tag className="w-3 h-3 shrink-0" /> <span className="truncate">{task.boardName}</span>
                      </span>
                      {(task.startDate || task.dueDate) && (
-                       <span className="text-primary/80 flex items-center gap-1 bg-primary/5 px-1.5 py-0.5 rounded shrink-0">
+                       <span className="text-red-600 flex items-center gap-1 bg-red-50 px-1.5 py-0.5 rounded shrink-0 font-bold border border-red-100">
                          <Clock className="w-2.5 h-2.5" /> 
                          {task.dueDate ? new Date(task.dueDate).toLocaleDateString('vi-VN', {day: '2-digit', month: '2-digit'}) : '...'}
                        </span>
