@@ -4,6 +4,7 @@ import { Board, List, User } from "../types";
 import KanbanColumn from "../components/KanbanColumn";
 import AddColumnForm from "./AddColumnForm";
 import TeamChat from "./TeamChat";
+import RoadmapView from "./RoadmapView";
 
 interface BoardDetailProps {
   selectedBoard: Board;
@@ -37,6 +38,7 @@ export default function BoardDetail({
   handleAddList
 }: BoardDetailProps) {
   const [showChat, setShowChat] = useState(false);
+  const [activeTab, setActiveTab] = useState<"backlog" | "roadmap">("backlog");
   const isTeam = selectedBoard.type === "team" || (selectedBoard.members && selectedBoard.members.length > 1);
 
   const fetchBoardData = async () => {
@@ -157,39 +159,68 @@ export default function BoardDetail({
         </div>
       </div>
 
-      {/* Interactive Kanban Grid */}
-      <div className="flex-1 flex flex-col md:flex-row gap-6 items-start overflow-x-auto pb-6 scrollbar-thin">
-        {selectedBoard.lists?.map((list: List) => (
-          <div key={list.id} className="w-full md:w-80 shrink-0 h-full">
-            <KanbanColumn
-              list={list}
-              selectedBoard={selectedBoard}
-              handleAddTask={handleAddTask}
-              handleDeleteTask={handleDeleteTask}
-              handleMoveTask={handleMoveTask}
-              handleDeleteColumn={handleDeleteList}
-              handleUpdateTask={handleUpdateTaskDetails}
-              currentUser={user}
-            />
-          </div>
-        ))}
-        
-        {/* Add Column Button Form */}
-        <div className="w-full md:w-80 shrink-0">
-          <AddColumnForm handleAddColumn={handleAddList} />
-        </div>
-        
-        {showChat && isTeam && (
-          <div className="w-full md:w-80 shrink-0 h-full">
-             <TeamChat 
-               board={selectedBoard} 
-               user={user} 
-               token={token} 
-               onRefreshBoard={fetchBoardData} 
-             />
-          </div>
-        )}
+      <div className="flex gap-4 border-b border-outline-variant/60">
+         <button
+            onClick={() => setActiveTab("backlog")}
+            className={`pb-2 text-sm font-bold transition-all ${
+               activeTab === "backlog"
+                  ? "text-primary border-b-2 border-primary"
+                  : "text-on-surface-variant hover:text-on-surface"
+            }`}
+         >
+            Backlog (Bảng tính)
+         </button>
+         <button
+            onClick={() => setActiveTab("roadmap")}
+            className={`pb-2 text-sm font-bold transition-all ${
+               activeTab === "roadmap"
+                  ? "text-primary border-b-2 border-primary"
+                  : "text-on-surface-variant hover:text-on-surface"
+            }`}
+         >
+            Roadmap (Lộ trình)
+         </button>
       </div>
+
+      {activeTab === "backlog" && (
+        <div className="flex-1 flex flex-col md:flex-row gap-6 items-start overflow-x-auto pb-6 scrollbar-thin">
+          {selectedBoard.lists?.map((list: List) => (
+            <div key={list.id} className="w-full md:w-80 shrink-0 h-full">
+              <KanbanColumn
+                list={list}
+                selectedBoard={selectedBoard}
+                handleAddTask={handleAddTask}
+                handleDeleteTask={handleDeleteTask}
+                handleMoveTask={handleMoveTask}
+                handleDeleteColumn={handleDeleteList}
+                handleUpdateTask={handleUpdateTaskDetails}
+                currentUser={user}
+              />
+            </div>
+          ))}
+          
+          {/* Add Column Button Form */}
+          <div className="w-full md:w-80 shrink-0">
+            <AddColumnForm handleAddColumn={handleAddList} />
+          </div>
+        </div>
+      )}
+
+      {activeTab === "roadmap" && (
+        <RoadmapView board={selectedBoard} handleUpdateTask={handleUpdateTaskDetails} />
+      )}
+
+      {showChat && isTeam && (
+        <div className="fixed bottom-4 right-4 z-50 animate-in slide-in-from-bottom-4 fade-in duration-200">
+           <TeamChat 
+             board={selectedBoard} 
+             user={user} 
+             token={token} 
+             onRefreshBoard={fetchBoardData} 
+             onClose={() => setShowChat(false)}
+           />
+        </div>
+      )}
     </div>
   );
 }

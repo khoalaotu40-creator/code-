@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { User, Post, PostComment, Board } from "../types";
+import MiniCalendar from "./MiniCalendar";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import "dayjs/locale/vi";
@@ -616,48 +617,7 @@ export default function NewsFeedView({ user, token, boards = [] }: NewsFeedViewP
 
         {/* RIGHT COLUMN: Widgets */}
         <div className="hidden lg:block lg:col-span-1 space-y-6">
-          <div className="bg-surface-container-lowest border border-outline-variant rounded-2xl shadow-xs overflow-hidden">
-            <div className="p-4 border-b border-outline-variant bg-surface-container-low/50 flex items-center justify-between">
-              <h3 className="font-bold text-sm text-on-surface flex items-center gap-2">
-                <AlertCircle className="w-4 h-4 text-orange-500" />
-                Hạn chót khẩn cấp
-              </h3>
-              <span className="text-[10px] bg-orange-100 text-orange-700 font-bold px-2 py-0.5 rounded-full">3</span>
-            </div>
-            <div className="p-4 space-y-3">
-              {[
-                { title: "Nộp báo cáo giữa kỳ", board: "Đồ án SE104.Q28", time: "Hôm nay, 23:59" },
-                { title: "Review Code Backend", board: "Dự án cá nhân", time: "Ngày mai, 12:00" },
-                { title: "Thiết kế Entity DB", board: "Đồ án hệ cơ sở", time: "2 ngày nữa" }
-              ].map((task, idx) => (
-                <div key={idx} className="flex flex-col gap-1 p-3 bg-surface-container-low rounded-xl border border-outline-variant/50 hover:bg-surface-container cursor-pointer transition-colors group">
-                  <span className="text-xs font-bold text-on-surface group-hover:text-primary transition-colors">{task.title}</span>
-                  <div className="flex justify-between items-center mt-1 text-[10px] font-medium">
-                    <span className="text-on-surface-variant flex items-center gap-1">
-                      <Tag className="w-3 h-3" /> {task.board}
-                    </span>
-                    <span className="text-orange-600 flex items-center gap-1">
-                      <Clock className="w-3 h-3" /> {task.time}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="bg-surface-container-lowest border border-outline-variant rounded-2xl shadow-xs overflow-hidden">
-            <div className="p-4 border-b border-outline-variant bg-surface-container-low/50">
-              <h3 className="font-bold text-sm text-on-surface flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-                Công việc của tôi (Đang làm)
-              </h3>
-            </div>
-            <div className="p-4 space-y-3">
-              <div className="text-center py-6 text-on-surface-variant/70 text-xs">
-                Chưa có công việc nào đang xử lý.
-              </div>
-            </div>
-          </div>
+          <MiniCalendar boards={boards} />
         </div>
 
       </div>

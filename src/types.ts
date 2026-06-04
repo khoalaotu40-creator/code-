@@ -26,6 +26,7 @@ export interface Task {
   id: string;
   title: string;
   description: string;
+  startDate?: string; // YYYY-MM-DD
   dueDate?: string; // YYYY-MM-DD
   priority?: "low" | "medium" | "high";
   label?: string; // e.g. "Cá nhân", "Quan trọng"

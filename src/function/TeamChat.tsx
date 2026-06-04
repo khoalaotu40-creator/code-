@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Send, MessageSquare } from "lucide-react";
+import { Send, MessageSquare, X } from "lucide-react";
 import { Board, User, ChatMessage } from "../types";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
@@ -13,9 +13,10 @@ interface TeamChatProps {
   user: User | null;
   token: string | null;
   onRefreshBoard: () => void;
+  onClose?: () => void;
 }
 
-export default function TeamChat({ board, user, token, onRefreshBoard }: TeamChatProps) {
+export default function TeamChat({ board, user, token, onRefreshBoard, onClose }: TeamChatProps) {
   const [message, setMessage] = useState("");
   const [isSending, setIsSending] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -59,10 +60,17 @@ export default function TeamChat({ board, user, token, onRefreshBoard }: TeamCha
   };
 
   return (
-    <div className="flex flex-col h-[500px] w-full md:w-80 bg-surface-container-lowest border border-outline-variant shadow-sm rounded-xl overflow-hidden shrink-0">
-      <div className="p-4 border-b border-outline-variant bg-surface-container-low flex items-center gap-2">
-        <MessageSquare className="h-5 w-5 text-primary" />
-        <h3 className="font-bold text-sm text-on-surface">Trao đổi nhóm</h3>
+    <div className="flex flex-col h-[450px] w-full md:w-80 bg-surface-container-lowest border border-outline-variant shadow-xl rounded-xl overflow-hidden shrink-0">
+      <div className="p-4 border-b border-outline-variant bg-surface-container-low flex justify-between items-center">
+        <div className="flex items-center gap-2">
+          <MessageSquare className="h-5 w-5 text-primary" />
+          <h3 className="font-bold text-sm text-on-surface">Trao đổi nhóm</h3>
+        </div>
+        {onClose && (
+          <button onClick={onClose} className="text-on-surface-variant hover:text-on-surface transition-colors cursor-pointer">
+            <X className="h-4 w-4" />
+          </button>
+        )}
       </div>
       
       <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-surface">
