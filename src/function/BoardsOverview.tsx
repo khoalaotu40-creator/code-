@@ -6,7 +6,6 @@ interface BoardsOverviewProps {
   recentBoards: Board[];
   filteredBoards: Board[];
   handleSelectBoard: (boardId: string) => void;
-  handleToggleFavorite: (e: React.MouseEvent, board: Board) => void;
   handleDeleteBoard: (boardId: string) => void;
   setShowCreateModal: (show: boolean) => void;
 }
@@ -15,7 +14,6 @@ export default function BoardsOverview({
   recentBoards,
   filteredBoards,
   handleSelectBoard,
-  handleToggleFavorite,
   handleDeleteBoard,
   setShowCreateModal
 }: BoardsOverviewProps) {
@@ -39,33 +37,26 @@ export default function BoardsOverview({
                 onClick={() => handleSelectBoard(board.id)}
                 className={`group relative h-32 rounded-xl bg-gradient-to-br ${board.bgGradient} shadow-sm border border-outline-variant overflow-hidden cursor-pointer hover:-translate-y-1 transition-all duration-300`}
               >
-                <div className="absolute inset-0 bg-white/40 group-hover:bg-transparent transition-all"></div>
+                <div className="absolute inset-0 bg-white/40 dark:bg-black/40 group-hover:bg-transparent transition-all"></div>
                 <div className="relative h-full flex flex-col justify-between p-4 z-10">
                   <div className="flex justify-between items-start gap-1">
-                    <h3 className="font-semibold text-sm text-on-surface line-clamp-2 leading-tight">
+                    <h3 className="font-semibold text-sm text-gray-900 dark:text-gray-300 line-clamp-2 leading-tight">
                       {board.title}
                     </h3>
-                    <div className="flex items-center gap-1 shrink-0 bg-white/40 rounded-lg p-0.5 backdrop-blur-xs">
-                      <button
-                        onClick={(e) => handleToggleFavorite(e, board)}
-                        className={`text-on-surface-variant hover:text-amber-500 transition-colors ${board.isFavorite ? "text-amber-500 fill-amber-500" : ""}`}
-                        title="Ghim yêu thích"
-                      >
-                        <Star className="h-3.5 w-3.5" />
-                      </button>
+                    <div className="flex items-center gap-1 shrink-0 bg-white/40 dark:bg-black/40 rounded-lg p-0.5 backdrop-blur-xs">
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
                           handleDeleteBoard(board.id);
                         }}
-                        className="text-on-surface-variant hover:text-red-600 transition-colors p-0.5"
+                        className="text-on-surface-variant dark:text-gray-300 hover:text-red-600 transition-colors p-0.5"
                         title="Xóa bảng"
                       >
                         <Trash2 className="h-3.5 w-3.5" />
                       </button>
                     </div>
                   </div>
-                  <span className="text-[10px] text-on-surface-variant bg-white/60 px-2 py-0.5 rounded-full inline-block w-fit backdrop-blur-xs font-semibold">
+                  <span className="text-[10px] text-on-surface-variant dark:text-gray-200 bg-white/60 dark:bg-black/60 px-2 py-0.5 rounded-full inline-block w-fit backdrop-blur-xs font-semibold">
                     {board.type === "personal" ? "Cá nhân" : "Nhóm dự án"}
                   </span>
                 </div>
@@ -88,26 +79,19 @@ export default function BoardsOverview({
               onClick={() => handleSelectBoard(board.id)}
               className={`group relative h-32 rounded-xl bg-gradient-to-br ${board.bgGradient} shadow-sm border border-outline-variant overflow-hidden cursor-pointer hover:shadow-md hover:-translate-y-0.5 transition-all duration-300`}
             >
-              <div className="absolute inset-0 bg-white/30 group-hover:bg-transparent transition-all"></div>
+              <div className="absolute inset-0 bg-white/30 dark:bg-black/40 group-hover:bg-transparent transition-all"></div>
               <div className="relative h-full flex flex-col p-4 justify-between z-10">
                 <div className="flex justify-between items-start gap-1">
-                  <h3 className="font-semibold text-sm text-on-surface line-clamp-2 leading-tight">
+                  <h3 className="font-semibold text-sm text-gray-900 dark:text-gray-300 line-clamp-2 leading-tight">
                     {board.title}
                   </h3>
-                  <div className="flex items-center gap-1 shrink-0 bg-white/40 rounded-lg p-0.5 backdrop-blur-xs">
-                    <button
-                      onClick={(e) => handleToggleFavorite(e, board)}
-                      className={`text-on-surface-variant hover:text-amber-500 transition-colors ${board.isFavorite ? "text-amber-500 fill-amber-500" : ""}`}
-                      title="Ghim yêu thích"
-                    >
-                      <Star className="h-3.5 w-3.5" />
-                    </button>
+                  <div className="flex items-center gap-1 shrink-0 bg-white/40 dark:bg-black/40 rounded-lg p-0.5 backdrop-blur-xs">
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
                         handleDeleteBoard(board.id);
                       }}
-                      className="text-on-surface-variant hover:text-red-600 transition-colors p-0.5"
+                      className="text-on-surface-variant dark:text-gray-300 hover:text-red-600 transition-colors p-0.5"
                       title="Xóa bảng"
                     >
                       <Trash2 className="h-3.5 w-3.5" />
@@ -115,10 +99,10 @@ export default function BoardsOverview({
                   </div>
                 </div>
                 <div className="flex justify-between items-end">
-                  <span className="px-2 py-0.5 bg-white/60 text-[10px] text-on-surface-variant rounded-full font-semibold backdrop-blur-xs">
+                  <span className="px-2 py-0.5 bg-white/60 dark:bg-black/60 text-[10px] text-on-surface-variant dark:text-gray-200 rounded-full font-semibold backdrop-blur-xs">
                     {board.type === "personal" ? "Cá nhân" : "Nhóm dự án"}
                   </span>
-                  <span className="text-[10px] text-on-surface-variant bg-black/5 px-1.5 py-0.5 rounded">
+                  <span className="text-[10px] text-on-surface-variant bg-black/5 dark:bg-white/10 dark:text-gray-300 px-1.5 py-0.5 rounded">
                     {board.lists?.reduce((acc, l) => acc + l.tasks.length, 0) || 0} thẻ việc
                   </span>
                 </div>
@@ -153,26 +137,19 @@ export default function BoardsOverview({
               onClick={() => handleSelectBoard(board.id)}
               className={`group relative h-32 rounded-xl bg-gradient-to-br ${board.bgGradient} shadow-sm border border-outline-variant overflow-hidden cursor-pointer hover:shadow-md hover:-translate-y-0.5 transition-all duration-300`}
             >
-              <div className="absolute inset-0 bg-white/30 group-hover:bg-transparent transition-all"></div>
+              <div className="absolute inset-0 bg-white/30 dark:bg-black/40 group-hover:bg-transparent transition-all"></div>
               <div className="relative h-full flex flex-col p-4 justify-between z-10">
                 <div className="flex justify-between items-start gap-1">
-                  <h3 className="font-semibold text-sm text-on-surface line-clamp-2 leading-tight">
+                  <h3 className="font-semibold text-sm text-gray-900 dark:text-gray-300 line-clamp-2 leading-tight">
                     {board.title}
                   </h3>
-                  <div className="flex items-center gap-1 shrink-0 bg-white/40 rounded-lg p-0.5 backdrop-blur-xs">
-                    <button
-                      onClick={(e) => handleToggleFavorite(e, board)}
-                      className={`text-on-surface-variant hover:text-amber-500 transition-colors ${board.isFavorite ? "text-amber-500 fill-amber-500" : ""}`}
-                      title="Ghim yêu thích"
-                    >
-                      <Star className="h-3.5 w-3.5" />
-                    </button>
+                  <div className="flex items-center gap-1 shrink-0 bg-white/40 dark:bg-black/40 rounded-lg p-0.5 backdrop-blur-xs">
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
                         handleDeleteBoard(board.id);
                       }}
-                      className="text-on-surface-variant hover:text-red-600 transition-colors p-0.5"
+                      className="text-on-surface-variant dark:text-gray-300 hover:text-red-600 transition-colors p-0.5"
                       title="Xóa bảng"
                     >
                       <Trash2 className="h-3.5 w-3.5" />
@@ -181,14 +158,14 @@ export default function BoardsOverview({
                 </div>
                 <div className="flex justify-between items-end">
                   <div className="flex gap-1 items-center">
-                    <span className="px-2 py-0.5 bg-white/60 text-[10px] text-on-surface-variant rounded-full font-semibold backdrop-blur-xs">
+                    <span className="px-2 py-0.5 bg-white/60 dark:bg-black/60 text-[10px] text-on-surface-variant dark:text-gray-200 rounded-full font-semibold backdrop-blur-xs">
                       Nhóm dự án
                     </span>
                     <span className="px-2 py-0.5 bg-primary/20 text-primary text-[10px] rounded-full font-semibold">
                       {board.members?.length} TV
                     </span>
                   </div>
-                  <span className="text-[10px] text-on-surface-variant bg-black/5 px-1.5 py-0.5 rounded">
+                  <span className="text-[10px] text-on-surface-variant dark:text-gray-300 bg-black/5 dark:bg-white/10 px-1.5 py-0.5 rounded">
                     {board.lists?.reduce((acc, l) => acc + l.tasks.length, 0) || 0} thẻ việc
                   </span>
                 </div>

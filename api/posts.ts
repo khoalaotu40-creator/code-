@@ -102,4 +102,44 @@ router.post("/:id/comment", requireAuth, (req, res) => {
   res.json({ post });
 });
 
+router.put("/:id", requireAuth, (req, res) => {
+  const { content } = req.body;
+  if (!content || !content.trim()) {
+    return res.status(400).json({ error: "Nội dung bài viết không được để trống." });
+  }
+
+  const db = getDb();
+  const post = db.posts?.find((p: Post) => p.id === req.params.id);
+  if (!post) {
+    return res.status(404).json({ error: "Không tìm thấy bài viết." });
+  }
+
+  const user = (req as any).user;
+  if (post.author.email !== user.email) {
+    return res.status(403).json({ error: "Bạn không có quyền chỉnh sửa bài viết này." });
+  }
+
+  post.content = content;
+  saveDb(db);
+  res.json({ post });
+});
+
+router.delete("/:id", requireAuth, (req, res) => {
+  const db = getDb();
+  const postIndex = db.posts?.findIndex((p: Post) => p.id === req.params.id);
+  if (postIndex === undefined || postIndex === -1) {
+    return res.status(404).json({ error: "Không tìm thấy bài viết." });
+  }
+
+  const user = (req as any).user;
+  const post = db.posts![postIndex];
+  if (post.author.email !== user.email) {
+    return res.status(403).json({ error: "Bạn không có quyền xóa bài viết này." });
+  }
+
+  db.posts!.splice(postIndex, 1);
+  saveDb(db);
+  res.json({ success: true });
+});
+
 export default router;

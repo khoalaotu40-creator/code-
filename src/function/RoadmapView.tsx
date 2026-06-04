@@ -68,13 +68,6 @@ export default function RoadmapView({ board, handleUpdateTask }: { board: Board,
                     </span>
                 </div>
                 <div className="flex items-center gap-1.5 text-xs text-on-surface-variant font-medium overflow-x-auto pb-1 md:pb-0 scrollbar-none">
-                    <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg hover:bg-surface-container transition-colors whitespace-nowrap">
-                        <MapPin className="w-4 h-4" /> Markers
-                    </button>
-                    <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg hover:bg-surface-container transition-colors whitespace-nowrap">
-                        <ListFilter className="w-4 h-4" /> Sort
-                    </button>
-                    <div className="w-px h-4 bg-outline-variant/60 mx-1"></div>
                     <button onClick={jumpToToday} className="px-3 py-1.5 rounded-lg hover:bg-surface-container transition-colors font-bold whitespace-nowrap text-on-surface">
                         Today
                     </button>

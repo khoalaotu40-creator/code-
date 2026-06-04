@@ -19,7 +19,9 @@ import {
   AlertCircle,
   Tag,
   CheckCircle2,
-  Share2
+  Edit2,
+  Trash2,
+  X
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { User, Post, PostComment, Board } from "../types";
@@ -73,6 +75,10 @@ export default function NewsFeedView({ user, token, boards = [] }: NewsFeedViewP
   // Comments active expand states
   const [expandedComments, setExpandedComments] = useState<Record<string, boolean>>({});
   const [newCommentText, setNewCommentText] = useState<Record<string, string>>({});
+
+  // Editing post states
+  const [editingPostId, setEditingPostId] = useState<string | null>(null);
+  const [editingContent, setEditingContent] = useState("");
 
   // Real-time time updater
   const [, setTick] = useState(0);
@@ -162,6 +168,45 @@ export default function NewsFeedView({ user, token, boards = [] }: NewsFeedViewP
       alert(err.message || "Đăng bài thất bại.");
     } finally {
       setIsSubmittingPost(false);
+    }
+  };
+
+  const handleUpdatePost = async (postId: string) => {
+    if (!editingContent.trim()) return;
+    try {
+      const response = await fetch(`/api/posts/${postId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({ content: editingContent })
+      });
+      if (!response.ok) throw new Error();
+      
+      const data = await response.json();
+      setPosts(prev => prev.map(p => p.id === postId ? data.post : p));
+      setEditingPostId(null);
+      setEditingContent("");
+    } catch {
+      alert("Cập nhật bài viết thất bại.");
+    }
+  };
+
+  const handleDeletePost = async (postId: string) => {
+    // Không dùng window.confirm vì dễ bị block trong iframe
+    try {
+      const response = await fetch(`/api/posts/${postId}`, {
+        method: "DELETE",
+        headers: {
+          "Authorization": `Bearer ${token}`
+        }
+      });
+      if (!response.ok) throw new Error();
+      
+      setPosts(prev => prev.filter(p => p.id !== postId));
+    } catch {
+      alert("Xóa bài viết thất bại.");
     }
   };
 
@@ -472,14 +517,61 @@ export default function NewsFeedView({ user, token, boards = [] }: NewsFeedViewP
                           </div>
                         </div>
 
-                        <button className="text-on-surface-variant hover:text-on-surface p-1.5 rounded-lg hover:bg-surface-container cursor-pointer">
-                          <Share2 className="h-4 w-4" />
-                        </button>
+                        <div className="flex gap-1">
+                          {user?.email === post.author.email && (
+                            <>
+                              <button
+                                onClick={() => {
+                                  if (editingPostId === post.id) {
+                                    setEditingPostId(null);
+                                  } else {
+                                    setEditingPostId(post.id);
+                                    setEditingContent(post.content);
+                                  }
+                                }}
+                                className="text-on-surface-variant hover:text-primary p-1.5 rounded-lg hover:bg-surface-container cursor-pointer"
+                              >
+                                <Edit2 className="h-4 w-4" />
+                              </button>
+                              <button
+                                onClick={() => handleDeletePost(post.id)}
+                                className="text-on-surface-variant hover:text-error p-1.5 rounded-lg hover:bg-surface-container cursor-pointer"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </button>
+                            </>
+                          )}
+                        </div>
                       </div>
 
                       {/* Post Content */}
                       <div className="px-4 pb-4.5 text-xs text-on-surface leading-relaxed whitespace-pre-wrap">
-                        {post.content}
+                        {editingPostId === post.id ? (
+                          <div className="flex flex-col gap-2">
+                            <textarea
+                              value={editingContent}
+                              onChange={(e) => setEditingContent(e.target.value)}
+                              className="w-full bg-surface-container-low border border-outline-variant rounded-xl p-3 text-xs text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary min-h-[80px] resize-y"
+                            />
+                            <div className="flex justify-end gap-2">
+                              <button
+                                onClick={() => setEditingPostId(null)}
+                                className="px-3 py-1.5 text-xs font-bold text-on-surface-variant hover:bg-surface-container rounded-lg cursor-pointer"
+                              >
+                                Hủy
+                              </button>
+                              <button
+                                onClick={() => handleUpdatePost(post.id)}
+                                disabled={!editingContent.trim()}
+                                className="px-3 py-1.5 text-xs font-bold bg-primary text-on-primary rounded-lg hover:bg-primary/90 disabled:opacity-50 cursor-pointer"
+                              >
+                                Lưu
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          post.content
+                        )}
                       </div>
 
                       {/* Post Attached Image if applies */}

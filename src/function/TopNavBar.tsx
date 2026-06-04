@@ -40,17 +40,6 @@ export default function TopNavBar({
             <span>Trở lại</span>
           </button>
         )}
-
-        <div className="relative w-full">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-on-surface-variant" />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-4 py-1.5 bg-surface-container-low border border-outline-variant rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-primary-container focus:border-transparent transition-all text-on-surface"
-            placeholder="Tìm kiếm bảng nhanh, nội dung thẻ hoặc nhiệm vụ..."
-          />
-        </div>
       </div>
 
       <div className="flex items-center gap-4 relative">

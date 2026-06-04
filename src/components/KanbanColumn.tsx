@@ -302,8 +302,8 @@ function EditTaskModal({ task, listTitle, onClose, onSave, currentUser, boardMem
                     const due = new Date(dueDate).getTime();
                     const now = new Date().getTime();
                     const diffDays = (due - now) / (1000 * 60 * 60 * 24);
-                    if (diffDays < 0) return "bg-red-50 text-red-600 ring-1 ring-red-400";
-                    if (diffDays <= 2) return "bg-orange-50 text-orange-600 ring-1 ring-orange-400";
+                    if (diffDays < 0) return "bg-red-50 dark:bg-red-950 text-red-600 dark:text-red-300 ring-1 ring-red-400 dark:ring-red-700";
+                    if (diffDays <= 2) return "bg-orange-50 dark:bg-orange-950 text-orange-600 dark:text-orange-300 ring-1 ring-orange-400 dark:ring-orange-700";
                     return "bg-surface-container-low hover:bg-surface-container-highest text-on-surface focus-within:ring-1 focus-within:ring-primary";
                   })()}`}>
                       <Calendar className="w-3.5 h-3.5 flex-shrink-0" />
@@ -510,10 +510,10 @@ export default function KanbanColumn({
                     <span
                       className={`px-1.5 py-0.5 rounded text-[9px] font-bold uppercase ${
                         task.priority === "high"
-                          ? "bg-red-50 text-red-600"
+                          ? "bg-red-50 dark:bg-red-950 text-red-600 dark:text-red-300"
                           : task.priority === "medium"
-                          ? "bg-amber-50 text-amber-700"
-                          : "bg-emerald-50 text-emerald-700"
+                          ? "bg-amber-50 dark:bg-amber-950 text-amber-700 dark:text-amber-300"
+                          : "bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300"
                       }`}
                     >
                       {task.priority === "high" ? "Khẩn" : task.priority === "medium" ? "Trung bình" : "Thấp"}
@@ -521,7 +521,7 @@ export default function KanbanColumn({
 
                     {/* Label flag */}
                     {task.label && (
-                      <span className="px-1.5 py-0.5 bg-blue-50 text-blue-700 rounded text-[9px] font-medium flex items-center gap-0.5">
+                      <span className="px-1.5 py-0.5 bg-blue-50 dark:bg-blue-950 text-blue-700 dark:text-blue-300 rounded text-[9px] font-medium flex items-center gap-0.5">
                         <Tag className="h-2.5 w-2.5" />
                         <span>{task.label}</span>
                       </span>
@@ -529,7 +529,7 @@ export default function KanbanColumn({
 
                     {/* Due Date Indicator */}
                     {task.dueDate && (
-                      <span className="px-1.5 py-0.5 bg-purple-50 text-purple-700 rounded text-[9px] font-medium flex items-center gap-0.5" title={`Hạn chót: ${task.dueDate}`}>
+                      <span className="px-1.5 py-0.5 bg-purple-50 dark:bg-purple-950 text-purple-700 dark:text-purple-300 rounded text-[9px] font-medium flex items-center gap-0.5" title={`Hạn chót: ${task.dueDate}`}>
                         <Calendar className="h-2.5 w-2.5" />
                         <span>{task.dueDate}</span>
                       </span>

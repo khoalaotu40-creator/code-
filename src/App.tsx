@@ -36,11 +36,12 @@ import NewsFeedView from "./components/NewsFeedView";
 
 import AddColumnForm from "./function/AddColumnForm";
 import SettingsView from "./function/SettingsView";
+import ProfileView from "./function/ProfileView";
 import SidebarNav from "./function/SidebarNav";
 import TopNavBar from "./function/TopNavBar";
 import CreateBoardModal from "./function/CreateBoardModal";
 
-type CurrentPage = "feed" | "boards" | "settings";
+type CurrentPage = "feed" | "boards" | "settings" | "profile";
 
 import BoardsOverview from "./function/BoardsOverview";
 import BoardDetail from "./function/BoardDetail";
@@ -86,16 +87,24 @@ export default function App() {
 
   // Gradient presets for creating exciting boards
   const GRADIENTS = [
-    { name: "Sắc đỏ ấm áp (Đồ án)", value: "from-error-container to-surface-container-lowest" },
-    { name: "Xanh ngọc dịu nhẹ (Marketing)", value: "from-[#cce8e4] to-surface-container-lowest" },
-    { name: "Xanh dương trẻ trung (Công việc)", value: "from-primary-fixed-dim to-surface-container-lowest" },
-    { name: "Cam san hô rực rỡ (Học tập)", value: "from-tertiary-fixed-dim to-surface-container-lowest" },
-    { name: "Xám tối giản (UI/UX)", value: "from-surface-variant to-surface-container-lowest" },
-    { name: "Tím mộng mơ (Content)", value: "from-[#e9d5ff] to-surface-container-lowest" }
+    { name: "Sắc đỏ ấm áp (Đồ án)", value: "from-red-200 dark:from-red-900/40 to-surface-container-lowest" },
+    { name: "Xanh ngọc dịu nhẹ (Marketing)", value: "from-teal-200 dark:from-teal-900/40 to-surface-container-lowest" },
+    { name: "Xanh dương trẻ trung (Công việc)", value: "from-blue-200 dark:from-blue-900/40 to-surface-container-lowest" },
+    { name: "Cam san hô rực rỡ (Học tập)", value: "from-orange-200 dark:from-orange-900/40 to-surface-container-lowest" },
+    { name: "Xám tối giản (UI/UX)", value: "from-gray-200 dark:from-gray-900/40 to-surface-container-lowest" },
+    { name: "Tím mộng mơ (Content)", value: "from-purple-200 dark:from-purple-900/40 to-surface-container-lowest" }
   ];
 
   // Load User and Boards if authenticated
   useEffect(() => {
+    // Apply saved theme
+    const savedTheme = localStorage.getItem("se104_theme");
+    if (savedTheme === "dark") {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+
     if (token) {
       fetchUserAndBoards();
     }
@@ -170,33 +179,6 @@ export default function App() {
       }
     } catch {
       setError("Mất kết nối máy chủ bảo mật.");
-    }
-  };
-
-  // Star Toggle
-  const handleToggleFavorite = async (e: React.MouseEvent, board: Board) => {
-    e.stopPropagation();
-    const updatedStatus = !board.isFavorite;
-
-    try {
-      const response = await fetch(`/api/boards/${board.id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ isFavorite: updatedStatus }),
-      });
-      if (response.ok) {
-        setBoards(prev =>
-          prev.map(b => (b.id === board.id ? { ...b, isFavorite: updatedStatus } : b))
-        );
-        if (selectedBoard && selectedBoard.id === board.id) {
-          setSelectedBoard(prev => prev ? { ...prev, isFavorite: updatedStatus } : null);
-        }
-      }
-    } catch {
-      setError("Không thể thiết lập trạng thái yêu thích.");
     }
   };
 
@@ -478,7 +460,6 @@ export default function App() {
                 recentBoards={recentBoards}
                 filteredBoards={filteredBoards}
                 handleSelectBoard={handleSelectBoard}
-                handleToggleFavorite={handleToggleFavorite}
                 handleDeleteBoard={handleDeleteBoard}
                 setShowCreateModal={setShowCreateModal}
               />
@@ -490,7 +471,6 @@ export default function App() {
                 selectedBoard={selectedBoard}
                 user={user}
                 token={token}
-                handleToggleFavorite={handleToggleFavorite}
                 handleDeleteBoard={handleDeleteBoard}
                 setSelectedBoard={setSelectedBoard}
                 setBoards={setBoards}
@@ -506,6 +486,11 @@ export default function App() {
             {/* D. SYSTEM SETTINGS PANEL VIEW */}
             {currentPage === "settings" && (
               <SettingsView user={user} token={token} setUser={setUser} />
+            )}
+
+            {/* E. PROFILE VIEW */}
+            {currentPage === "profile" && (
+              <ProfileView user={user} token={token} setUser={setUser} />
             )}
 
           </div>

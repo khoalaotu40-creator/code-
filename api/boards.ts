@@ -52,7 +52,7 @@ router.post("/", requireAuth, (req, res) => {
   const newBoard: Board = {
     id,
     title,
-    bgGradient: bgGradient || "from-primary-fixed-dim to-surface-container-lowest",
+    bgGradient: bgGradient || "from-blue-200 dark:from-blue-900/40 to-surface-container-lowest",
     type: type || "personal",
     description: description || "",
     isFavorite: false,

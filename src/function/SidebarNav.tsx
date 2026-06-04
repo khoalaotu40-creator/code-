@@ -1,5 +1,5 @@
 import React from "react";
-import { ChevronLeft, ChevronRight, Home, LayoutDashboard, Settings as SettingsIcon, LogOut } from "lucide-react";
+import { ChevronLeft, ChevronRight, Home, LayoutDashboard, Settings as SettingsIcon, LogOut, User as UserIcon } from "lucide-react";
 import { User } from "../types";
 
 interface SidebarNavProps {
@@ -86,6 +86,20 @@ export default function SidebarNav({
           >
             <LayoutDashboard className="h-5 w-5 shrink-0" />
             {!isSidebarCollapsed && <span>Bảng công việc</span>}
+          </button>
+
+          <button
+            id="tab_profile"
+            onClick={() => onNavigate("profile")}
+            title={isSidebarCollapsed ? "Hồ sơ cá nhân" : undefined}
+            className={`flex items-center gap-3 py-3 rounded-lg font-semibold text-sm transition-all text-left ${
+              currentPage === "profile"
+                ? "bg-primary-container text-on-primary-container scale-98"
+                : "text-on-surface-variant hover:bg-surface-container hover:text-on-surface"
+            } ${isSidebarCollapsed ? "justify-center px-0 w-11 mx-auto" : "px-4"}`}
+          >
+            <UserIcon className="h-5 w-5 shrink-0" />
+            {!isSidebarCollapsed && <span>Hồ sơ cá nhân</span>}
           </button>
 
           <button

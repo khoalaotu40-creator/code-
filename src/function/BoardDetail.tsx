@@ -10,7 +10,6 @@ interface BoardDetailProps {
   selectedBoard: Board;
   user: User | null;
   token: string | null;
-  handleToggleFavorite: (e: React.MouseEvent, board: Board) => void;
   handleDeleteBoard: (boardId: string) => void;
   setSelectedBoard: React.Dispatch<React.SetStateAction<Board | null>>;
   setBoards: React.Dispatch<React.SetStateAction<Board[]>>;
@@ -26,7 +25,6 @@ export default function BoardDetail({
   selectedBoard,
   user,
   token,
-  handleToggleFavorite,
   handleDeleteBoard,
   setSelectedBoard,
   setBoards,
@@ -65,12 +63,6 @@ export default function BoardDetail({
             <h2 className="text-2xl font-bold tracking-tight text-on-surface">
               {selectedBoard.title}
             </h2>
-            <button
-              onClick={(e) => handleToggleFavorite(e, selectedBoard)}
-              className={`text-on-surface-variant hover:text-amber-500 transition-colors ${selectedBoard.isFavorite ? "text-amber-500 fill-amber-500" : ""}`}
-            >
-              <Star className="h-5 w-5" />
-            </button>
             <span className="px-2 py-0.5 bg-primary-fixed text-on-primary-fixed text-[10px] font-semibold rounded-full uppercase tracking-wider">
               {selectedBoard.type === "personal" ? "Cá nhân" : "Nhóm dự án"}
             </span>
