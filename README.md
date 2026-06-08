@@ -7,7 +7,7 @@
   - Trương Phạm Đăng Khoa - 24520846
   - Lâm Ngọc Thiên Phúc - 24521378
   - Nguyễn Trần Đăng Khoa - 24520834
-- **Giáo viên hướng dẫn:** TS. Tiến
+- **Giáo viên hướng dẫn:** TS. Đỗ Văn Tiến
 
 ## ✨ Chức năng nổi bật
 - **Quản lý công việc tiện lợi:** Tổ chức bảng Kanban khoa học, giao diện kéo/thả mượt mà.
